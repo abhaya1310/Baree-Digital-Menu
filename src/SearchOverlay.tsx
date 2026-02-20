@@ -79,11 +79,11 @@ const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '' }: SearchO
 
       {/* Search panel — 393×338, #FAF7F2, rounded bottom corners */}
       <div
-        className="fixed top-0 left-1/2 -translate-x-1/2 w-[393px] min-h-[200px] max-h-[338px] bg-brand-cream rounded-b-[10px] z-[70] overflow-hidden"
+        className="fixed top-0 left-1/2 -translate-x-1/2 w-[393px] min-h-[200px] bg-brand-cream rounded-b-[10px] z-[70] flex flex-col items-start px-[13px] pt-[30px] pb-[30px] shadow-lg"
         style={{ animation: 'slideDown 0.22s ease' }}
       >
-        {/* Frame 133: column gap:10, left:13, top:30 */}
-        <div className="absolute left-[13px] top-[30px] flex flex-col items-start gap-[10px] w-[360px]">
+        {/* Frame 133: column gap:10 */}
+        <div className="flex flex-col items-start gap-[10px] w-full">
 
           {/* Input row + Cancel */}
           <div className="flex flex-row justify-between items-center gap-[10px] w-[360px] h-[30px]">

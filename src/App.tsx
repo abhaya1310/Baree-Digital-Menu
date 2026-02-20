@@ -4,7 +4,7 @@ import SpecialsScreen from './screens/SpecialsScreen';
 import DrinksScreen from './screens/DrinksScreen';
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState<'specials' | 'menu' | 'drinks'>('specials');
+  const [currentScreen, setCurrentScreen] = useState<'specials' | 'menu' | 'drinks'>('menu');
 
   return (
     <>

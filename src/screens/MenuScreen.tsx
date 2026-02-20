@@ -87,7 +87,7 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks }:
   const [activeFilterCount, setActiveFilterCount] = useState(0);
   const [isSearchActive, setIsSearchActive] = useState(false);
 
-  const CATEGORY_TABS = ['Offers for you', 'Starters', 'Mains', 'Desserts', 'Drinks', 'Breads'];
+  const CATEGORY_TABS = ['Starters', 'Mains', 'Desserts', 'Drinks', 'Breads'];
 
   const filteredDishes = dishes.filter((d) => {
     if (filterType === 'VEG') return d.isVeg === true;

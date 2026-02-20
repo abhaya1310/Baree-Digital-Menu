@@ -181,7 +181,7 @@ const FilterModal = ({ isOpen, onClose, onApply, type = 'food' }: FilterModalPro
               <span className="block font-inter font-medium text-[15px] leading-[18px] text-[#555555] mt-[11px]">
                 Select your price range
               </span>
-              <span className="block text-center font-inter font-medium text-[14px] leading-[17px] text-brand-amber mt-[11px]">
+              <span className="block text-center font-inter font-medium text-[14px] leading-[17px] text-brand-accent mt-[11px]">
                 ₹0 - ₹{priceMax}
               </span>
 
@@ -189,15 +189,15 @@ const FilterModal = ({ isOpen, onClose, onApply, type = 'food' }: FilterModalPro
               <div className="relative w-[243px] mt-[8px]">
                 <div className="relative h-[15px] w-[229px] ml-[7px]">
                   {/* Track */}
-                  <div className="absolute left-0 top-[7px] w-[229px] border-t-2 border-brand-amber/50" />
+                  <div className="absolute left-0 top-[7px] w-[229px] border-t-2 border-brand-accent/50" />
                   {/* Active fill */}
                   <div
-                    className="absolute top-[7px] border-t-2 border-brand-amber"
+                    className="absolute top-[7px] border-t-2 border-brand-accent"
                     style={{ width: `${(priceMax / 2000) * 229}px` }}
                   />
                   {/* Thumb */}
                   <div
-                    className="absolute top-0 w-[15px] h-[15px] rounded-full bg-brand-amber"
+                    className="absolute top-0 w-[15px] h-[15px] rounded-full bg-brand-accent"
                     style={{ left: `${(priceMax / 2000) * 214}px` }}
                   />
                   {/* Invisible real range input */}
@@ -210,8 +210,8 @@ const FilterModal = ({ isOpen, onClose, onApply, type = 'food' }: FilterModalPro
                 </div>
                 {/* Min / Max labels */}
                 <div className="flex flex-row justify-between items-center w-[241px] mt-[4px]">
-                  <span className="font-roboto font-normal text-[12px] leading-[14px] text-brand-amber">₹0</span>
-                  <span className="font-roboto font-normal text-[12px] leading-[14px] text-brand-amber">₹2000</span>
+                  <span className="font-roboto font-normal text-[12px] leading-[14px] text-brand-accent">₹0</span>
+                  <span className="font-roboto font-normal text-[12px] leading-[14px] text-brand-accent">₹2000</span>
                 </div>
               </div>
 
