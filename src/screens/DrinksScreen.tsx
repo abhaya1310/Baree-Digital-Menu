@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import SearchOverlay from '../SearchOverlay';
-import FilterModal from '../FilterModal';
-import MenuCategoriesModal from '../MenuCategoriesModal';
-import DishDetailModal from '../DishDetailModal';
-import { drinks, type Drink } from '../data/drinks';
-import CategoryCard from '../components/ui/CategoryCard';
-import MenuFab from '../components/ui/MenuFab';
+import React, { useState } from "react";
+import SearchOverlay from "../SearchOverlay";
+import FilterModal from "../FilterModal";
+import MenuCategoriesModal from "../MenuCategoriesModal";
+import DishDetailModal from "../DishDetailModal";
+import { drinks, type Drink } from "../data/drinks";
+import CategoryCard from "../components/ui/CategoryCard";
+import MenuFab from "../components/ui/MenuFab";
 
 interface DrinksScreenProps {
   onNavigateToSpecials: () => void;
@@ -13,32 +13,59 @@ interface DrinksScreenProps {
   onNavigateToTobacco: () => void;
 }
 
-const DRINK_TABS = ['Cocktails', 'Brewed drinks', 'Wine', 'Hard liquor', 'Beer', 'Shots', 'Aperitifs'];
+const DRINK_TABS = [
+  "Beer",
+  "Soft Drink",
+  "Mocktail",
+  "Shakes",
+  "Signature Cocktail",
+  "Classic Cocktail",
+  "Single Malt Whiskey",
+  "American Whisky",
+  "Blended Scotch Whiskey",
+  "SHORTS",
+  "LIQUERS",
+  "GIN",
+  "VODKA",
+  "TEQUILA",
+  "RUM",
+  "Hard liquor",
+  "SPARKLING WINE",
+  "RED WINE",
+  "WHITE WINE",
+];
 
-export default function DrinksScreen({ onNavigateToSpecials, onNavigateToFood, onNavigateToTobacco }: DrinksScreenProps) {
+export default function DrinksScreen({
+  onNavigateToSpecials,
+  onNavigateToFood,
+  onNavigateToTobacco,
+}: DrinksScreenProps) {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
   const [selectedDrink, setSelectedDrink] = useState<Drink | null>(null);
   const [activeFilters, setActiveFilters] = useState(0);
-  const [alcoholicMode, setAlcoholicMode] = useState<'ALCOHOLIC' | 'NON-ALCOHOLIC'>('ALCOHOLIC');
-  const [activeTab, setActiveTab] = useState('Cocktails');
+  const [alcoholicMode, setAlcoholicMode] = useState<
+    "ALCOHOLIC" | "NON-ALCOHOLIC"
+  >("ALCOHOLIC");
+  const [activeTab, setActiveTab] = useState("Beer");
 
   // Filter drinks based on tab and alcoholic mode
-  const filteredDrinks = drinks.filter(drink => {
+  const filteredDrinks = drinks.filter((drink) => {
     // Basic tab match
     if (drink.category !== activeTab) return false;
 
     // Alcoholic mode match
-    // Note: 'Brewed drinks' are considered non-alcoholic. 
-    // Mocktails (which are under 'Cocktails') should also show in non-alcoholic mode.
-    // However, our data mapping now groups Mocktails into 'Cocktails'. 
-    // We can check the description for 'Mocktail' to be precise if needed, 
-    // but for now, we'll follow a simpler rule:
-    if (alcoholicMode === 'NON-ALCOHOLIC') {
-      return drink.category === 'Brewed drinks' || (drink.description?.toLowerCase().includes('mocktail'));
+    // Non-alcoholic categories: Soft Drink, Mocktail, Shakes
+    const nonAlcoholicCategories = ["Soft Drink", "Mocktail", "Shakes"];
+    const isNonAlcoholic = nonAlcoholicCategories.includes(
+      drink.category || "",
+    );
+
+    if (alcoholicMode === "NON-ALCOHOLIC") {
+      return isNonAlcoholic;
     } else {
-      return drink.category !== 'Brewed drinks' && !(drink.description?.toLowerCase().includes('mocktail'));
+      return !isNonAlcoholic;
     }
   });
 
@@ -64,9 +91,9 @@ export default function DrinksScreen({ onNavigateToSpecials, onNavigateToFood, o
       <MenuCategoriesModal
         isOpen={isCategoriesModalOpen}
         onClose={() => setIsCategoriesModalOpen(false)}
-        onCategorySelect={(cat) => { 
+        onCategorySelect={(cat) => {
           setActiveTab(cat);
-          setIsCategoriesModalOpen(false); 
+          setIsCategoriesModalOpen(false);
         }}
         type="drinks"
       />
@@ -81,10 +108,13 @@ export default function DrinksScreen({ onNavigateToSpecials, onNavigateToFood, o
 
       {/* Header */}
       <div className="max-w-[393px] mx-auto relative px-[21px] box-border">
-
         {/* Logo */}
         <div className="flex justify-center pt-[29px] pb-[10px]">
-          <img src="/logo.png" alt="CSAT" className="w-[100px] h-[35px] object-contain" />
+          <img
+            src="/logo.png"
+            alt="CSAT"
+            className="w-[100px] h-[35px] object-contain"
+          />
         </div>
 
         {/* Category cards */}
@@ -110,25 +140,25 @@ export default function DrinksScreen({ onNavigateToSpecials, onNavigateToFood, o
         <div className="box-border w-[351px] h-[36px] bg-white border-[0.6px] border-brand-border shadow-[0px_2.3px_2px_rgba(124,63,32,0.25)] rounded-[50px] flex flex-row items-center p-[3px_11px_3px_3px] gap-[10px] mx-auto">
           {/* ALCOHOLIC pill */}
           <button
-            onClick={() => setAlcoholicMode('ALCOHOLIC')}
+            onClick={() => setAlcoholicMode("ALCOHOLIC")}
             className={[
-              'flex-1 h-[30px] rounded-[50px] flex justify-center items-center cursor-pointer font-inter font-semibold text-[14px] leading-[17px] transition-colors duration-200 border-0',
-              alcoholicMode === 'ALCOHOLIC'
-                ? 'bg-brand-brown/80 text-white'
-                : 'bg-white text-brand-brown/80',
-            ].join(' ')}
+              "flex-1 h-[30px] rounded-[50px] flex justify-center items-center cursor-pointer font-inter font-semibold text-[14px] leading-[17px] transition-colors duration-200 border-0",
+              alcoholicMode === "ALCOHOLIC"
+                ? "bg-brand-brown/80 text-white"
+                : "bg-white text-brand-brown/80",
+            ].join(" ")}
           >
             ALCOHOLIC
           </button>
           {/* NON-ALCOHOLIC pill */}
           <button
-            onClick={() => setAlcoholicMode('NON-ALCOHOLIC')}
+            onClick={() => setAlcoholicMode("NON-ALCOHOLIC")}
             className={[
-              'flex-1 h-[30px] rounded-[50px] flex justify-center items-center cursor-pointer font-inter font-semibold text-[14px] leading-[17px] transition-colors duration-200 border-0',
-              alcoholicMode === 'NON-ALCOHOLIC'
-                ? 'bg-brand-brown/80 text-white'
-                : 'bg-white text-brand-brown/80',
-            ].join(' ')}
+              "flex-1 h-[30px] rounded-[50px] flex justify-center items-center cursor-pointer font-inter font-semibold text-[14px] leading-[17px] transition-colors duration-200 border-0",
+              alcoholicMode === "NON-ALCOHOLIC"
+                ? "bg-brand-brown/80 text-white"
+                : "bg-white text-brand-brown/80",
+            ].join(" ")}
           >
             NON-ALCOHOLIC
           </button>
@@ -141,13 +171,16 @@ export default function DrinksScreen({ onNavigateToSpecials, onNavigateToFood, o
           {DRINK_TABS.map((tab) => {
             const isActive = activeTab === tab;
             return (
-              <div key={tab} className="flex flex-col items-center gap-[2px] shrink-0">
+              <div
+                key={tab}
+                className="flex flex-col items-center gap-[2px] shrink-0"
+              >
                 <button
                   onClick={() => setActiveTab(tab)}
                   className={[
-                    'bg-transparent border-0 cursor-pointer p-0 font-inter font-medium text-[16px] leading-[19px] whitespace-nowrap',
-                    isActive ? 'text-brand-accent' : 'text-brand-border',
-                  ].join(' ')}
+                    "bg-transparent border-0 cursor-pointer p-0 font-inter font-medium text-[16px] leading-[19px] whitespace-nowrap",
+                    isActive ? "text-brand-accent" : "text-brand-border",
+                  ].join(" ")}
                 >
                   {tab}
                 </button>
@@ -163,7 +196,6 @@ export default function DrinksScreen({ onNavigateToSpecials, onNavigateToFood, o
 
       {/* Scrollable content */}
       <div className="max-w-[393px] mx-auto px-[21px] box-border pt-4">
-
         {/* Search bar */}
         <div className="box-border w-full h-[35px] bg-brand-white border-[0.6px] border-brand-border shadow-[1px_2px_2px_rgba(255,255,255,0.3)] rounded-[50px] mb-5 flex flex-row justify-between items-center py-[7px] px-[14px]">
           <div className="flex flex-row justify-between items-center w-full">
@@ -172,23 +204,74 @@ export default function DrinksScreen({ onNavigateToSpecials, onNavigateToFood, o
               onClick={() => setIsSearchActive(true)}
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="7" cy="7" r="5" stroke="rgba(124, 63, 32, 0.8)" strokeWidth="1.5" />
-                <line x1="11" y1="11" x2="15" y2="15" stroke="rgba(124, 63, 32, 0.8)" strokeWidth="1.5" strokeLinecap="round" />
+                <circle
+                  cx="7"
+                  cy="7"
+                  r="5"
+                  stroke="rgba(124, 63, 32, 0.8)"
+                  strokeWidth="1.5"
+                />
+                <line
+                  x1="11"
+                  y1="11"
+                  x2="15"
+                  y2="15"
+                  stroke="rgba(124, 63, 32, 0.8)"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
               </svg>
-              <span className="font-roboto font-normal text-[12px] text-brand-brown opacity-60">Search items...</span>
+              <span className="font-roboto font-normal text-[12px] text-brand-brown opacity-60">
+                Search items...
+              </span>
             </div>
             {/* Filter icon + badge */}
             <div
               className="relative w-[23px] h-[19.5px] cursor-pointer shrink-0"
               onClick={() => setIsFilterModalOpen(true)}
             >
-              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" className="absolute left-0 top-[6.5px]">
-                <line x1="1" y1="2.5" x2="12" y2="2.5" stroke="rgba(124, 63, 32, 0.8)" strokeWidth="1.1" strokeLinecap="round" />
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 13 13"
+                fill="none"
+                className="absolute left-0 top-[6.5px]"
+              >
+                <line
+                  x1="1"
+                  y1="2.5"
+                  x2="12"
+                  y2="2.5"
+                  stroke="rgba(124, 63, 32, 0.8)"
+                  strokeWidth="1.1"
+                  strokeLinecap="round"
+                />
                 <circle cx="4" cy="2.5" r="1.5" fill="rgba(124, 63, 32, 0.8)" />
-                <line x1="1" y1="6.5" x2="12" y2="6.5" stroke="rgba(124, 63, 32, 0.8)" strokeWidth="1.1" strokeLinecap="round" />
+                <line
+                  x1="1"
+                  y1="6.5"
+                  x2="12"
+                  y2="6.5"
+                  stroke="rgba(124, 63, 32, 0.8)"
+                  strokeWidth="1.1"
+                  strokeLinecap="round"
+                />
                 <circle cx="9" cy="6.5" r="1.5" fill="rgba(124, 63, 32, 0.8)" />
-                <line x1="1" y1="10.5" x2="12" y2="10.5" stroke="rgba(124, 63, 32, 0.8)" strokeWidth="1.1" strokeLinecap="round" />
-                <circle cx="6" cy="10.5" r="1.5" fill="rgba(124, 63, 32, 0.8)" />
+                <line
+                  x1="1"
+                  y1="10.5"
+                  x2="12"
+                  y2="10.5"
+                  stroke="rgba(124, 63, 32, 0.8)"
+                  strokeWidth="1.1"
+                  strokeLinecap="round"
+                />
+                <circle
+                  cx="6"
+                  cy="10.5"
+                  r="1.5"
+                  fill="rgba(124, 63, 32, 0.8)"
+                />
               </svg>
               {activeFilters > 0 && (
                 <div className="absolute left-[9px] top-0 w-[14px] h-[15px]">
@@ -207,7 +290,7 @@ export default function DrinksScreen({ onNavigateToSpecials, onNavigateToFood, o
         <div className="flex flex-col items-center gap-5 w-[314px] mx-auto">
           {drinkPairs.map((pair, rowIdx) => (
             <React.Fragment key={rowIdx}>
-              <div 
+              <div
                 className="relative w-[314px] h-[212px] shrink-0"
                 style={{ opacity: activeFilters > 0 ? 0.8 : 1 }}
               >
@@ -221,30 +304,38 @@ export default function DrinksScreen({ onNavigateToSpecials, onNavigateToFood, o
                   />
                 ))}
               </div>
-              
-              {/* Insert promo card after row 1 (index 0) if it's the alcoholic cocktails tab */}
-              {rowIdx === 0 && activeTab === 'Cocktails' && alcoholicMode === 'ALCOHOLIC' && (
-                <div
-                  className="box-border relative overflow-hidden w-[351px] h-[162px] bg-grad-promo border border-brand-accent shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[5px] shrink-0 cursor-pointer"
-                  style={{ opacity: activeFilters > 0 ? 0.8 : 1 }}
-                  onClick={onNavigateToSpecials}
-                >
-                  <div className="absolute left-4 top-[17px] flex flex-col gap-[10px] w-[172px] h-[140px] z-10">
-                    <span className="font-playfair font-medium text-[25px] leading-[30px] text-brand-cream">
-                      Buy 1, get 1 special
-                    </span>
-                    <span className="font-inter font-normal text-[12px] leading-[18px] tracking-[0.02em] text-brand-cream">
-                      Buy a cocktail of above ₹250, and get another cocktails for absolutely free.
-                    </span>
-                  </div>
+
+              {/* Insert promo card after row 1 (index 0) if it's a cocktails tab */}
+              {rowIdx === 0 &&
+                (activeTab === "Signature Cocktail" ||
+                  activeTab === "Classic Cocktail") &&
+                alcoholicMode === "ALCOHOLIC" && (
                   <div
-                    className="absolute w-[217px] h-[217px] rounded-full overflow-hidden shadow-[-4px_-5px_9px_brand-brownMid]"
-                    style={{ left: '194px', top: '-15px' }}
+                    className="box-border relative overflow-hidden w-[351px] h-[162px] bg-grad-promo border border-brand-accent shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[5px] shrink-0 cursor-pointer"
+                    style={{ opacity: activeFilters > 0 ? 0.8 : 1 }}
+                    onClick={onNavigateToSpecials}
                   >
-                    <img src="/drinks.png" alt="Buy 1 Get 1" className="w-full h-full object-cover" />
+                    <div className="absolute left-4 top-[17px] flex flex-col gap-[10px] w-[172px] h-[140px] z-10">
+                      <span className="font-playfair font-medium text-[25px] leading-[30px] text-brand-cream">
+                        Buy 1, get 1 special
+                      </span>
+                      <span className="font-inter font-normal text-[12px] leading-[18px] tracking-[0.02em] text-brand-cream">
+                        Buy a cocktail of above ₹250, and get another cocktails
+                        for absolutely free.
+                      </span>
+                    </div>
+                    <div
+                      className="absolute w-[217px] h-[217px] rounded-full overflow-hidden shadow-[-4px_-5px_9px_brand-brownMid]"
+                      style={{ left: "194px", top: "-15px" }}
+                    >
+                      <img
+                        src="/drinks.png"
+                        alt="Buy 1 Get 1"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </React.Fragment>
           ))}
 
@@ -255,7 +346,9 @@ export default function DrinksScreen({ onNavigateToSpecials, onNavigateToFood, o
                 onClick={() => setActiveFilters(0)}
                 className="w-[146px] h-[33px] bg-brand-accent rounded-[80px] border-0 cursor-pointer flex justify-center items-center px-[10px]"
               >
-                <span className="font-inter font-semibold text-[13px] leading-[16px] text-white">Clear filters</span>
+                <span className="font-inter font-semibold text-[13px] leading-[16px] text-white">
+                  Clear filters
+                </span>
               </button>
             </div>
           )}
@@ -280,34 +373,40 @@ function DrinkCard({
   row2?: boolean;
 }) {
   // Row 2 col 0 image is offset left:13.23; rows 1&3 col 0 image is left:0
-  const imgLeft = row2 || colIdx === 1 ? '13.23px' : '0px';
+  const imgLeft = row2 || colIdx === 1 ? "13.23px" : "0px";
 
   return (
     <div
       onClick={onClick}
       className="flex flex-col items-start gap-[2px] absolute w-[127px] h-[198px] cursor-pointer"
       style={{
-        left: colIdx === 0 ? '0px' : '187px',
-        top: colIdx === 0 ? '0px' : '14px',
+        left: colIdx === 0 ? "0px" : "187px",
+        top: colIdx === 0 ? "0px" : "14px",
       }}
     >
       {/* Image container */}
       <div
         className="relative shrink-0 h-[123px]"
-        style={{ width: colIdx === 0 && !row2 ? '109px' : '122.23px' }}
+        style={{ width: colIdx === 0 && !row2 ? "109px" : "122.23px" }}
       >
         <div
           className="box-border absolute w-[109px] h-[109px] top-0 border-[0.4px] border-[rgba(125,121,121,0.7)] rounded-[3px] overflow-hidden"
           style={{ left: imgLeft }}
         >
-          <img src={drink.image} alt={drink.name} className="w-full h-full object-cover" />
+          <img
+            src={drink.image}
+            alt={drink.name}
+            className="w-full h-full object-cover"
+          />
         </div>
         {/* Signature badge */}
         <div
           className="flex flex-row justify-center items-center px-[3px] gap-[10px] absolute w-[91px] h-[20px] top-[103px] bg-brand-accent rounded-[2px]"
-          style={{ left: colIdx === 0 && !row2 ? '7.77px' : '0px' }}
+          style={{ left: colIdx === 0 && !row2 ? "7.77px" : "0px" }}
         >
-          <span className="font-playfair font-semibold text-[12px] leading-[14px] text-white">Signature</span>
+          <span className="font-playfair font-semibold text-[12px] leading-[14px] text-white">
+            Signature
+          </span>
         </div>
       </div>
       {/* Text block */}
@@ -317,7 +416,9 @@ function DrinkCard({
             {drink.name}
           </span>
           <div className="flex flex-row items-center gap-[20px] w-[123px] h-[15px]">
-            <span className="font-roboto font-normal text-[13px] leading-[15px] text-brand-brown">₹{drink.price}</span>
+            <span className="font-roboto font-normal text-[13px] leading-[15px] text-brand-brown">
+              ₹{drink.price}
+            </span>
           </div>
         </div>
         <p className="font-inter font-normal text-[12px] leading-[18px] tracking-[0.02em] text-brand-muted m-0 w-[127px]">
