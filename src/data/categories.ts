@@ -29,4 +29,9 @@ export const drinkCategories: CategoryDefinition[] = [
   { name: 'Aperitifs', image: 'https://images.pexels.com/photos/338713/pexels-photo-338713.jpeg?auto=compress&cs=tinysrgb&w=300' },
 ];
 
-
+// Hookah (Tobacco) categories
+export const hookahCategories: CategoryDefinition[] = [
+  { name: 'Classic', image: 'https://images.pexels.com/photos/2101187/pexels-photo-2101187.jpeg?auto=compress&cs=tinysrgb&w=300' },
+  { name: 'Mix', image: 'https://images.pexels.com/photos/2101187/pexels-photo-2101187.jpeg?auto=compress&cs=tinysrgb&w=300' },
+  { name: 'Special', image: 'https://images.pexels.com/photos/2101187/pexels-photo-2101187.jpeg?auto=compress&cs=tinysrgb&w=300' },
+];

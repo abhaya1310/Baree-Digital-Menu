@@ -4,7 +4,7 @@ interface FilterModalProps {
   isOpen: boolean;
   onClose: () => void;
   onApply: (count: number) => void;
-  type?: 'food' | 'drinks';
+  type?: 'food' | 'drinks' | 'tobacco';
 }
 
 // ── Custom radio button (13×13 circle, #A9712F fill when selected) ──

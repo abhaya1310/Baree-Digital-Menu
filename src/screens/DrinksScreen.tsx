@@ -3,25 +3,50 @@ import SearchOverlay from '../SearchOverlay';
 import FilterModal from '../FilterModal';
 import MenuCategoriesModal from '../MenuCategoriesModal';
 import DishDetailModal from '../DishDetailModal';
-import { drinks, type DrinkItem } from '../data/drinks';
+import { drinks, type Drink } from '../data/drinks';
 import CategoryCard from '../components/ui/CategoryCard';
 import MenuFab from '../components/ui/MenuFab';
 
 interface DrinksScreenProps {
   onNavigateToSpecials: () => void;
   onNavigateToFood: () => void;
+  onNavigateToTobacco: () => void;
 }
 
-const DRINK_TABS = ['Cocktails', 'Brewed drinks', 'Desserts', 'Drinks', 'Breads'];
+const DRINK_TABS = ['Cocktails', 'Brewed drinks', 'Wine', 'Hard liquor', 'Beer', 'Shots', 'Aperitifs'];
 
-export default function DrinksScreen({ onNavigateToSpecials, onNavigateToFood }: DrinksScreenProps) {
+export default function DrinksScreen({ onNavigateToSpecials, onNavigateToFood, onNavigateToTobacco }: DrinksScreenProps) {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
-  const [selectedDrink, setSelectedDrink] = useState<DrinkItem | null>(null);
+  const [selectedDrink, setSelectedDrink] = useState<Drink | null>(null);
   const [activeFilters, setActiveFilters] = useState(0);
   const [alcoholicMode, setAlcoholicMode] = useState<'ALCOHOLIC' | 'NON-ALCOHOLIC'>('ALCOHOLIC');
-  const [activeTab, setActiveTab] = useState('cocktails');
+  const [activeTab, setActiveTab] = useState('Cocktails');
+
+  // Filter drinks based on tab and alcoholic mode
+  const filteredDrinks = drinks.filter(drink => {
+    // Basic tab match
+    if (drink.category !== activeTab) return false;
+
+    // Alcoholic mode match
+    // Note: 'Brewed drinks' are considered non-alcoholic. 
+    // Mocktails (which are under 'Cocktails') should also show in non-alcoholic mode.
+    // However, our data mapping now groups Mocktails into 'Cocktails'. 
+    // We can check the description for 'Mocktail' to be precise if needed, 
+    // but for now, we'll follow a simpler rule:
+    if (alcoholicMode === 'NON-ALCOHOLIC') {
+      return drink.category === 'Brewed drinks' || (drink.description?.toLowerCase().includes('mocktail'));
+    } else {
+      return drink.category !== 'Brewed drinks' && !(drink.description?.toLowerCase().includes('mocktail'));
+    }
+  });
+
+  // Group drinks into pairs for the staggered grid
+  const drinkPairs: Drink[][] = [];
+  for (let i = 0; i < filteredDrinks.length; i += 2) {
+    drinkPairs.push(filteredDrinks.slice(i, i + 2));
+  }
 
   return (
     <div className="min-h-screen bg-brand-cream text-brand-brown pb-[100px] relative">
@@ -39,7 +64,10 @@ export default function DrinksScreen({ onNavigateToSpecials, onNavigateToFood }:
       <MenuCategoriesModal
         isOpen={isCategoriesModalOpen}
         onClose={() => setIsCategoriesModalOpen(false)}
-        onCategorySelect={() => { setIsCategoriesModalOpen(false); }}
+        onCategorySelect={(cat) => { 
+          setActiveTab(cat);
+          setIsCategoriesModalOpen(false); 
+        }}
         type="drinks"
       />
       {selectedDrink && (
@@ -74,6 +102,7 @@ export default function DrinksScreen({ onNavigateToSpecials, onNavigateToFood }:
           <CategoryCard
             label="Tobacco"
             img="https://images.pexels.com/photos/4969832/pexels-photo-4969832.jpeg?auto=compress&cs=tinysrgb&w=200"
+            onClick={onNavigateToTobacco}
           />
         </div>
 
@@ -108,14 +137,13 @@ export default function DrinksScreen({ onNavigateToSpecials, onNavigateToFood }:
 
       {/* Nav tabs */}
       <div className="max-w-[393px] mx-auto mt-3">
-        <div className="flex flex-row items-start gap-[30px] pl-[15px] pr-[15px] overflow-x-auto [scrollbar-width:none] w-[377.96px] box-border">
+        <div className="flex flex-row items-start gap-[30px] pl-[15px] pr-[15px] overflow-x-auto [scrollbar-width:none] w-full box-border">
           {DRINK_TABS.map((tab) => {
-            const tabKey = tab.toLowerCase().replace(/ /g, '');
-            const isActive = activeTab === tabKey;
+            const isActive = activeTab === tab;
             return (
               <div key={tab} className="flex flex-col items-center gap-[2px] shrink-0">
                 <button
-                  onClick={() => setActiveTab(tabKey)}
+                  onClick={() => setActiveTab(tab)}
                   className={[
                     'bg-transparent border-0 cursor-pointer p-0 font-inter font-medium text-[16px] leading-[19px] whitespace-nowrap',
                     isActive ? 'text-brand-accent' : 'text-brand-border',
@@ -124,7 +152,7 @@ export default function DrinksScreen({ onNavigateToSpecials, onNavigateToFood }:
                   {tab}
                 </button>
                 {isActive && (
-                  <div className="w-[80px] h-0 border-t-[3px] border-brand-accent rounded-[2px]" />
+                  <div className="w-full h-0 border-t-[3px] border-brand-accent rounded-[2px]" />
                 )}
               </div>
             );
@@ -177,22 +205,52 @@ export default function DrinksScreen({ onNavigateToSpecials, onNavigateToFood }:
 
         {/* Drink grid */}
         <div className="flex flex-col items-center gap-5 w-[314px] mx-auto">
-
-          {/* Row 1 — staggered 2-col */}
-          <div className="relative w-[314px] h-[212px] shrink-0">
-            {[drinks[0], drinks[1]].map((drink, colIdx) => (
-              <DrinkCard
-                key={drink.name}
-                drink={drink}
-                colIdx={colIdx}
-                onClick={() => setSelectedDrink(drink)}
-              />
-            ))}
-          </div>
+          {drinkPairs.map((pair, rowIdx) => (
+            <React.Fragment key={rowIdx}>
+              <div 
+                className="relative w-[314px] h-[212px] shrink-0"
+                style={{ opacity: activeFilters > 0 ? 0.8 : 1 }}
+              >
+                {pair.map((drink, colIdx) => (
+                  <DrinkCard
+                    key={drink.name}
+                    drink={drink}
+                    colIdx={colIdx}
+                    onClick={() => setSelectedDrink(drink)}
+                    row2={rowIdx % 2 !== 0}
+                  />
+                ))}
+              </div>
+              
+              {/* Insert promo card after row 1 (index 0) if it's the alcoholic cocktails tab */}
+              {rowIdx === 0 && activeTab === 'Cocktails' && alcoholicMode === 'ALCOHOLIC' && (
+                <div
+                  className="box-border relative overflow-hidden w-[351px] h-[162px] bg-grad-promo border border-brand-accent shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[5px] shrink-0 cursor-pointer"
+                  style={{ opacity: activeFilters > 0 ? 0.8 : 1 }}
+                  onClick={onNavigateToSpecials}
+                >
+                  <div className="absolute left-4 top-[17px] flex flex-col gap-[10px] w-[172px] h-[140px] z-10">
+                    <span className="font-playfair font-medium text-[25px] leading-[30px] text-brand-cream">
+                      Buy 1, get 1 special
+                    </span>
+                    <span className="font-inter font-normal text-[12px] leading-[18px] tracking-[0.02em] text-brand-cream">
+                      Buy a cocktail of above ₹250, and get another cocktails for absolutely free.
+                    </span>
+                  </div>
+                  <div
+                    className="absolute w-[217px] h-[217px] rounded-full overflow-hidden shadow-[-4px_-5px_9px_brand-brownMid]"
+                    style={{ left: '194px', top: '-15px' }}
+                  >
+                    <img src="/drinks.png" alt="Buy 1 Get 1" className="w-full h-full object-cover" />
+                  </div>
+                </div>
+              )}
+            </React.Fragment>
+          ))}
 
           {/* Clear filters pill */}
           {activeFilters > 0 && (
-            <div className="flex justify-center w-full">
+            <div className="flex justify-center w-full mt-4">
               <button
                 onClick={() => setActiveFilters(0)}
                 className="w-[146px] h-[33px] bg-brand-accent rounded-[80px] border-0 cursor-pointer flex justify-center items-center px-[10px]"
@@ -201,60 +259,6 @@ export default function DrinksScreen({ onNavigateToSpecials, onNavigateToFood }:
               </button>
             </div>
           )}
-
-          {/* Row 2 — dimmed when filters active */}
-          <div
-            className="relative w-[314px] h-[212px] shrink-0"
-            style={{ opacity: activeFilters > 0 ? 0.8 : 1 }}
-          >
-            {[drinks[2], drinks[3]].map((drink, colIdx) => (
-              <DrinkCard
-                key={drink.name}
-                drink={drink}
-                colIdx={colIdx}
-                onClick={() => setSelectedDrink(drink)}
-                row2
-              />
-            ))}
-          </div>
-
-          {/* Buy 1 Get 1 special card */}
-          <div
-            className="box-border relative overflow-hidden w-[351px] h-[162px] bg-grad-promo border border-brand-accent shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[5px] shrink-0 cursor-pointer"
-            style={{ opacity: activeFilters > 0 ? 0.8 : 1 }}
-            onClick={onNavigateToSpecials}
-          >
-            <div className="absolute left-4 top-[17px] flex flex-col gap-[10px] w-[172px] h-[140px] z-10">
-              <span className="font-playfair font-medium text-[25px] leading-[30px] text-brand-cream">
-                Buy 1, get 1 special
-              </span>
-              <span className="font-inter font-normal text-[12px] leading-[18px] tracking-[0.02em] text-brand-cream">
-                Buy a cocktail of above ₹250, and get another cocktails for absolutely free.
-              </span>
-            </div>
-            <div
-              className="absolute w-[217px] h-[217px] rounded-full overflow-hidden shadow-[-4px_-5px_9px_brand-brownMid]"
-              style={{ left: '194px', top: '-15px' }}
-            >
-              <img src="/drinks.png" alt="Buy 1 Get 1" className="w-full h-full object-cover" />
-            </div>
-          </div>
-
-          {/* Row 3 — dimmed when filters active */}
-          <div
-            className="relative w-[314px] h-[212px] shrink-0"
-            style={{ opacity: activeFilters > 0 ? 0.8 : 1 }}
-          >
-            {[drinks[4], drinks[5]].map((drink, colIdx) => (
-              <DrinkCard
-                key={drink.name}
-                drink={drink}
-                colIdx={colIdx}
-                onClick={() => setSelectedDrink(drink)}
-              />
-            ))}
-          </div>
-
         </div>
       </div>
 
@@ -270,7 +274,7 @@ function DrinkCard({
   onClick,
   row2 = false,
 }: {
-  drink: DrinkItem;
+  drink: Drink;
   colIdx: number;
   onClick: () => void;
   row2?: boolean;

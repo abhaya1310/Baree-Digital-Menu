@@ -1,16 +1,16 @@
 import { useEffect } from 'react';
-import { drinkCategories, foodCategories } from './data/categories';
+import { drinkCategories, foodCategories, hookahCategories } from './data/categories';
 
 interface MenuCategoriesModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCategorySelect?: (category: string) => void;
-  type?: 'food' | 'drinks';
+  type?: 'food' | 'drinks' | 'tobacco';
 }
 
 export default function MenuCategoriesModal({ isOpen, onClose, onCategorySelect, type = 'food' }: MenuCategoriesModalProps) {
-  const displayCategories = type === 'food' ? foodCategories : drinkCategories;
-  const title = type === 'food' ? 'Menu categories' : 'Drink categories';
+  const displayCategories = type === 'food' ? foodCategories : type === 'drinks' ? drinkCategories : hookahCategories;
+  const title = type === 'food' ? 'Menu categories' : type === 'drinks' ? 'Drink categories' : 'Tobacco categories';
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : 'unset';

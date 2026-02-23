@@ -11,6 +11,7 @@ import VegDot from '../components/ui/VegDot';
 interface MenuScreenProps {
   onNavigateToSpecials: () => void;
   onNavigateToDrinks: () => void;
+  onNavigateToTobacco: () => void;
 }
 
 // ── Dish card ────────────────────────────────────────────────────────────────
@@ -78,7 +79,7 @@ function DishCard({ dish, onClick, cardWidth = 138 }: { dish: Dish; onClick: () 
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
-export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks }: MenuScreenProps) {
+export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, onNavigateToTobacco }: MenuScreenProps) {
   const [activeTab, setActiveTab] = useState('starters');
   const [filterType, setFilterType] = useState<'ALL' | 'VEG' | 'NON-VEG'>('ALL');
   const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
@@ -106,11 +107,13 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks }:
         isOpen={isMenuModalOpen}
         onClose={() => setIsMenuModalOpen(false)}
         onCategorySelect={(category) => { setIsMenuModalOpen(false); setActiveTab(category.toLowerCase()); }}
+        type="food"
       />
       <FilterModal
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
         onApply={(count) => setActiveFilterCount(count)}
+        type="food"
       />
       <SearchOverlay
         isOpen={isSearchActive}
@@ -140,6 +143,7 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks }:
           <CategoryCard
             label="Tobacco"
             img="https://images.pexels.com/photos/4969832/pexels-photo-4969832.jpeg?auto=compress&cs=tinysrgb&w=200"
+            onClick={onNavigateToTobacco}
           />
         </div>
 

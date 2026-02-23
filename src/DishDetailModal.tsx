@@ -11,7 +11,7 @@ interface Dish {
   name: string;
   image: string;
   price: number;
-  time: string;
+  time?: string;
   description?: string;
   isVeg?: boolean;
   calories?: string;
@@ -23,7 +23,7 @@ interface DishDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   dish: Dish;
-  type?: 'food' | 'drink';
+  type?: 'food' | 'drink' | 'tobacco';
 }
 
 // ── Reusable section heading row (icon + label) ──
