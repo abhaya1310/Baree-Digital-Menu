@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DishDetailModal from '../DishDetailModal';
 import MenuCategoriesModal from '../MenuCategoriesModal';
 import FilterModal from '../FilterModal';
@@ -80,7 +80,7 @@ function DishCard({ dish, onClick, cardWidth = 138 }: { dish: Dish; onClick: () 
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, onNavigateToTobacco }: MenuScreenProps) {
-  const [activeTab, setActiveTab] = useState('starters');
+  const [activeTab, setActiveTab] = useState('meals');
   const [filterType, setFilterType] = useState<'ALL' | 'VEG' | 'NON-VEG'>('ALL');
   const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
@@ -88,9 +88,32 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
   const [activeFilterCount, setActiveFilterCount] = useState(0);
   const [isSearchActive, setIsSearchActive] = useState(false);
 
-  const CATEGORY_TABS = ['Starters', 'Mains', 'Desserts', 'Drinks', 'Breads'];
+  const ALL_CATEGORIES = ['Meals', 'Desserts', 'Pizza', 'Sushi', 'Burger', 'Dimsum', 'Pasta', 'Noodles', 'Breakfast'];
+
+  // Calculate which tabs actually have items based on the current veg/non-veg filter
+  const CATEGORY_TABS = ALL_CATEGORIES.filter(catName => {
+    const catLower = catName.toLowerCase().replace(/ /g, '');
+    return dishes.some(d => {
+      const dishCat = d.category?.toLowerCase().replace(/ /g, '') || '';
+      if (dishCat !== catLower) return false;
+      if (filterType === 'VEG') return d.isVeg === true;
+      if (filterType === 'NON-VEG') return d.isVeg === false;
+      return true;
+    });
+  });
+
+  // If current activeTab is hidden, switch to first available
+  useEffect(() => {
+    const activeTabExists = CATEGORY_TABS.some(t => t.toLowerCase().replace(/ /g, '') === activeTab);
+    if (!activeTabExists && CATEGORY_TABS.length > 0) {
+      setActiveTab(CATEGORY_TABS[0].toLowerCase().replace(/ /g, ''));
+    }
+  }, [CATEGORY_TABS, activeTab]);
 
   const filteredDishes = dishes.filter((d) => {
+    const dishTab = d.category?.toLowerCase().replace(/ /g, '') || '';
+    if (dishTab !== activeTab) return false;
+
     if (filterType === 'VEG') return d.isVeg === true;
     if (filterType === 'NON-VEG') return d.isVeg === false;
     return true;
@@ -106,8 +129,12 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
       <MenuCategoriesModal
         isOpen={isMenuModalOpen}
         onClose={() => setIsMenuModalOpen(false)}
-        onCategorySelect={(category) => { setIsMenuModalOpen(false); setActiveTab(category.toLowerCase()); }}
+        onCategorySelect={(category) => {
+          setIsMenuModalOpen(false);
+          setActiveTab(category.toLowerCase().replace(/ /g, ''));
+        }}
         type="food"
+        availableCategories={CATEGORY_TABS}
       />
       <FilterModal
         isOpen={isFilterModalOpen}
@@ -201,7 +228,7 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
                     </button>
                   </div>
                   {isActive && !isOffers && (
-                    <div className="w-[80px] h-0 border-t-[3px] border-brand-accent rounded-[2px]" />
+                    <div className="w-full h-0 border-t-[3px] border-brand-accent rounded-[2px]" />
                   )}
                 </div>
               );

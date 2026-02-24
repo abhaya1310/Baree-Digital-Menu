@@ -6,10 +6,15 @@ interface MenuCategoriesModalProps {
   onClose: () => void;
   onCategorySelect?: (category: string) => void;
   type?: 'food' | 'drinks' | 'tobacco';
+  availableCategories?: string[];
 }
 
-export default function MenuCategoriesModal({ isOpen, onClose, onCategorySelect, type = 'food' }: MenuCategoriesModalProps) {
-  const displayCategories = type === 'food' ? foodCategories : type === 'drinks' ? drinkCategories : hookahCategories;
+export default function MenuCategoriesModal({ isOpen, onClose, onCategorySelect, type = 'food', availableCategories }: MenuCategoriesModalProps) {
+  const allCategories = type === 'food' ? foodCategories : type === 'drinks' ? drinkCategories : hookahCategories;
+  const displayCategories = availableCategories 
+    ? allCategories.filter(cat => availableCategories.some(ac => ac.toLowerCase().replace(/ /g, '') === cat.name.toLowerCase().replace(/ /g, '')))
+    : allCategories;
+    
   const title = type === 'food' ? 'Menu categories' : type === 'drinks' ? 'Drink categories' : 'Tobacco categories';
 
   useEffect(() => {

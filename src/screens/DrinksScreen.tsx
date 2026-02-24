@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SearchOverlay from "../SearchOverlay";
 import FilterModal from "../FilterModal";
 import MenuCategoriesModal from "../MenuCategoriesModal";
@@ -13,28 +13,6 @@ interface DrinksScreenProps {
   onNavigateToTobacco: () => void;
 }
 
-const DRINK_TABS = [
-  "Beer",
-  "Soft Drink",
-  "Mocktail",
-  "Shakes",
-  "Signature Cocktail",
-  "Classic Cocktail",
-  "Single Malt Whiskey",
-  "American Whisky",
-  "Blended Scotch Whiskey",
-  "SHORTS",
-  "LIQUERS",
-  "GIN",
-  "VODKA",
-  "TEQUILA",
-  "RUM",
-  "Hard liquor",
-  "SPARKLING WINE",
-  "RED WINE",
-  "WHITE WINE",
-];
-
 export default function DrinksScreen({
   onNavigateToSpecials,
   onNavigateToFood,
@@ -45,10 +23,33 @@ export default function DrinksScreen({
   const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
   const [selectedDrink, setSelectedDrink] = useState<Drink | null>(null);
   const [activeFilters, setActiveFilters] = useState(0);
-  const [alcoholicMode, setAlcoholicMode] = useState<
-    "ALCOHOLIC" | "NON-ALCOHOLIC"
-  >("ALCOHOLIC");
+  const [alcoholicMode, setAlcoholicMode] = useState<"ALCOHOLIC" | "NON-ALCOHOLIC">("ALCOHOLIC");
   const [activeTab, setActiveTab] = useState("Beer");
+
+  const ALL_DRINK_TABS = [
+    "Beer", "Soft Drink", "Mocktail", "Shakes", "Signature Cocktail", 
+    "Classic Cocktail", "Single Malt Whiskey", "American Whisky", 
+    "Blended Scotch Whiskey", "SHORTS", "LIQUERS", "GIN", "VODKA", 
+    "TEQUILA", "RUM", "Hard liquor", "SPARKLING WINE", "RED WINE", "WHITE WINE"
+  ];
+
+  // Calculate which tabs actually have items based on the current alcoholic mode
+  const DRINK_TABS = ALL_DRINK_TABS.filter(catName => {
+    return drinks.some(drink => {
+      if (drink.category !== catName) return false;
+      const nonAlcoholicCategories = ["Soft Drink", "Mocktail", "Shakes", "Brewed drinks"];
+      const isNonAlcoholic = nonAlcoholicCategories.includes(drink.category || "");
+      if (alcoholicMode === "NON-ALCOHOLIC") return isNonAlcoholic;
+      return !isNonAlcoholic;
+    });
+  });
+
+  // If current activeTab is hidden, switch to first available
+  useEffect(() => {
+    if (DRINK_TABS.length > 0 && !DRINK_TABS.includes(activeTab)) {
+      setActiveTab(DRINK_TABS[0]);
+    }
+  }, [DRINK_TABS, activeTab]);
 
   // Filter drinks based on tab and alcoholic mode
   const filteredDrinks = drinks.filter((drink) => {
@@ -96,6 +97,7 @@ export default function DrinksScreen({
           setIsCategoriesModalOpen(false);
         }}
         type="drinks"
+        availableCategories={DRINK_TABS}
       />
       {selectedDrink && (
         <DishDetailModal

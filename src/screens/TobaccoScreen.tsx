@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SearchOverlay from '../SearchOverlay';
 import FilterModal from '../FilterModal';
 import MenuCategoriesModal from '../MenuCategoriesModal';
@@ -13,7 +13,7 @@ interface TobaccoScreenProps {
   onNavigateToDrinks: () => void;
 }
 
-const TOBACCO_TABS = ['Classic', 'Mix', 'Special'];
+const ALL_TOBACCO_TABS = ['Classic', 'Mix', 'Special'];
 
 export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, onNavigateToDrinks }: TobaccoScreenProps) {
   const [isSearchActive, setIsSearchActive] = useState(false);
@@ -22,6 +22,16 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
   const [selectedHookah, setSelectedHookah] = useState<HookahItem | null>(null);
   const [activeFilters, setActiveFilters] = useState(0);
   const [activeTab, setActiveTab] = useState('classic');
+
+  const TOBACCO_TABS = ALL_TOBACCO_TABS.filter(catName => 
+    hookahItems.some(h => h.category?.toLowerCase() === catName.toLowerCase())
+  );
+
+  useEffect(() => {
+    if (TOBACCO_TABS.length > 0 && !TOBACCO_TABS.some(t => t.toLowerCase() === activeTab)) {
+      setActiveTab(TOBACCO_TABS[0].toLowerCase());
+    }
+  }, [TOBACCO_TABS, activeTab]);
 
   return (
     <div className="min-h-screen bg-brand-cream text-brand-brown pb-[100px] relative">
@@ -39,8 +49,12 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
       <MenuCategoriesModal
         isOpen={isCategoriesModalOpen}
         onClose={() => setIsCategoriesModalOpen(false)}
-        onCategorySelect={() => { setIsCategoriesModalOpen(false); }}
+        onCategorySelect={(cat) => {
+          setIsCategoriesModalOpen(false);
+          setActiveTab(cat.toLowerCase().replace(/ /g, ''));
+        }}
         type="tobacco"
+        availableCategories={TOBACCO_TABS}
       />
       {selectedHookah && (
         <DishDetailModal
@@ -96,7 +110,7 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
                   {tab}
                 </button>
                 {isActive && (
-                  <div className="w-[80px] h-0 border-t-[3px] border-brand-accent rounded-[2px]" />
+                  <div className="w-full h-0 border-t-[3px] border-brand-accent rounded-[2px]" />
                 )}
               </div>
             );
