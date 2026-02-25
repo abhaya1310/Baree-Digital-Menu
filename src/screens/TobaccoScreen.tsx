@@ -23,6 +23,7 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
   const [activeFilters, setActiveFilters] = useState(0);
   const [activeTab, setActiveTab] = useState('classic');
 
+  // Calculate which tabs actually have items
   const TOBACCO_TABS = ALL_TOBACCO_TABS.filter(catName => 
     hookahItems.some(h => h.category?.toLowerCase() === catName.toLowerCase())
   );
@@ -32,6 +33,15 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
       setActiveTab(TOBACCO_TABS[0].toLowerCase());
     }
   }, [TOBACCO_TABS, activeTab]);
+
+  // Filter items based on tab
+  const filteredHookah = hookahItems.filter(h => h.category?.toLowerCase() === activeTab);
+
+  // Group items into pairs for the staggered grid
+  const hookahPairs: HookahItem[][] = [];
+  for (let i = 0; i < filteredHookah.length; i += 2) {
+    hookahPairs.push(filteredHookah.slice(i, i + 2));
+  }
 
   return (
     <div className="min-h-screen bg-brand-cream text-brand-brown pb-[100px] relative">
@@ -94,7 +104,7 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
 
       {/* Nav tabs */}
       <div className="max-w-[393px] mx-auto mt-3">
-        <div className="flex flex-row items-start gap-[30px] pl-[15px] pr-[15px] overflow-x-auto [scrollbar-width:none] w-[377.96px] box-border">
+        <div className="flex flex-row items-start gap-[30px] pl-[15px] pr-[15px] overflow-x-auto [scrollbar-width:none] w-full box-border">
           {TOBACCO_TABS.map((tab) => {
             const tabKey = tab.toLowerCase().replace(/ /g, '');
             const isActive = activeTab === tabKey;
@@ -134,6 +144,7 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
               </svg>
               <span className="font-roboto font-normal text-[12px] text-brand-brown opacity-60">Search items...</span>
             </div>
+            {/* Filter icon + badge */}
             <div
               className="relative w-[23px] h-[19.5px] cursor-pointer shrink-0"
               onClick={() => setIsFilterModalOpen(true)}
@@ -146,29 +157,126 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
                 <line x1="1" y1="10.5" x2="12" y2="10.5" stroke="rgba(124, 63, 32, 0.8)" strokeWidth="1.1" strokeLinecap="round" />
                 <circle cx="6" cy="10.5" r="1.5" fill="rgba(124, 63, 32, 0.8)" />
               </svg>
+              {activeFilters > 0 && (
+                <div className="absolute left-[9px] top-0 w-[14px] h-[15px]">
+                  <div className="absolute left-0 top-[1px] w-[14px] h-[14px] rounded-full bg-brand-accent flex items-center justify-center">
+                    <span className="font-roboto font-normal text-[9px] leading-[10px] text-white">
+                      {activeFilters}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* Hookah grid */}
-        <div className="flex flex-col items-center gap-5 w-[314px] mx-auto">
-          {hookahItems.filter(h => h.category?.toLowerCase() === activeTab).map((hookah, idx) => (
+        <div className="flex flex-col items-center gap-5 w-full">
+          {hookahPairs.map((pair, rowIdx) => (
             <div
-              key={hookah.name}
-              onClick={() => setSelectedHookah(hookah)}
-              className="flex flex-row items-center gap-[15px] w-full p-2 bg-white rounded-[10px] shadow-sm cursor-pointer"
+              key={rowIdx}
+              className="relative w-[351px] h-[232px] shrink-0"
             >
-              <img src={hookah.image} alt={hookah.name} className="w-[80px] h-[80px] rounded-[5px] object-cover" />
-              <div className="flex flex-col gap-[5px]">
-                <span className="font-playfair font-medium text-[18px] text-brand-brown">{hookah.name}</span>
-                <span className="font-roboto text-[14px] text-brand-brown">₹{hookah.price}</span>
-              </div>
+              {pair.map((hookah, colIdx) => (
+                <HookahCard
+                  key={hookah.name}
+                  hookah={hookah}
+                  colIdx={colIdx}
+                  onClick={() => setSelectedHookah(hookah)}
+                  row2={rowIdx % 2 !== 0}
+                />
+              ))}
             </div>
           ))}
+
+          {/* Clear filters pill */}
+          {activeFilters > 0 && (
+            <div className="flex justify-center w-full mt-4">
+              <button
+                onClick={() => setActiveFilters(0)}
+                className="w-[146px] h-[33px] bg-brand-accent rounded-[80px] border-0 cursor-pointer flex justify-center items-center px-[10px]"
+              >
+                <span className="font-inter font-semibold text-[13px] leading-[16px] text-white">
+                  Clear filters
+                </span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       <MenuFab onClick={() => setIsCategoriesModalOpen(true)} />
+    </div>
+  );
+}
+
+// ── Shared hookah card sub-component ──────────────────────────────────────────
+function HookahCard({
+  hookah,
+  colIdx,
+  onClick,
+  row2 = false,
+}: {
+  hookah: HookahItem;
+  colIdx: number;
+  onClick: () => void;
+  row2?: boolean;
+}) {
+  const badgeWidth = hookah.badge === "Chef's special" || hookah.badge === 'Signature' ? '91px' : '125px';
+
+  return (
+    <div
+      onClick={onClick}
+      className="flex flex-col items-start gap-[2px] absolute w-[138px] h-[210px] cursor-pointer"
+      style={{
+        left: colIdx === 0 ? "12.6px" : "200.5px",
+        top: "0px",
+      }}
+    >
+      {/* Image container */}
+      <div
+        className="relative shrink-0 w-full h-[123px]"
+      >
+        <div
+          className="box-border absolute w-[109px] h-[109px] top-0 border-[0.4px] border-[rgba(125,121,121,0.7)] rounded-[3px] overflow-hidden"
+          style={{ left: '13px' }}
+        >
+          <img
+            src={hookah.image}
+            alt={hookah.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+        {/* Badge */}
+        {hookah.badge && (
+          <div
+            className="absolute left-0 top-[103px] h-[20px] bg-brand-accent rounded-[2px] flex justify-center items-center px-[3px]"
+            style={{ width: badgeWidth }}
+          >
+            <span className="font-playfair font-semibold text-[12px] leading-[14px] text-white whitespace-nowrap">
+              {hookah.badge}
+            </span>
+          </div>
+        )}
+      </div>
+      {/* Text block */}
+      <div className="flex flex-col items-start gap-[3px] w-[138px]">
+        <div className="flex flex-col items-start gap-[1px] w-full">
+          <span className="font-playfair font-medium text-[17px] leading-[21px] text-brand-brown block line-clamp-2">
+            {hookah.name}
+          </span>
+          <div className="flex flex-row items-center gap-[20px] w-[123px] h-[15px]">
+            <span className="font-roboto font-normal text-[13px] leading-[15px] text-brand-brown">
+              ₹{hookah.price}
+            </span>
+          </div>
+        </div>
+        {hookah.description && (
+          <p className="font-inter font-normal text-[12px] leading-[18px] tracking-[0.02em] text-brand-muted m-0 w-[127px] line-clamp-2">
+            {hookah.description}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
