@@ -22,10 +22,18 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
   const [selectedHookah, setSelectedHookah] = useState<HookahItem | null>(null);
   const [activeFilters, setActiveFilters] = useState(0);
   const [activeTab, setActiveTab] = useState('classic');
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Calculate which tabs actually have items
+  // Calculate which tabs actually have items based on search
   const TOBACCO_TABS = ALL_TOBACCO_TABS.filter(catName => 
-    hookahItems.some(h => h.category?.toLowerCase() === catName.toLowerCase())
+    hookahItems.some(h => {
+      const catMatch = h.category?.toLowerCase() === catName.toLowerCase();
+      if (!catMatch) return false;
+      const searchMatch = !searchQuery || 
+        h.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        h.category?.toLowerCase().includes(searchQuery.toLowerCase());
+      return searchMatch;
+    })
   );
 
   useEffect(() => {
@@ -34,10 +42,17 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
     }
   }, [TOBACCO_TABS, activeTab]);
 
-  // Filter items based on tab
-  const filteredHookah = hookahItems.filter(h => h.category?.toLowerCase() === activeTab);
+  // Filter items based on tab and search
+  const filteredHookah = hookahItems.filter(h => {
+    const tabMatch = h.category?.toLowerCase() === activeTab;
+    if (!tabMatch) return false;
+    const searchMatch = !searchQuery || 
+      h.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      h.category?.toLowerCase().includes(searchQuery.toLowerCase());
+    return searchMatch;
+  });
 
-  // Group items into pairs for the staggered grid
+  // Group items into pairs for the grid
   const hookahPairs: HookahItem[][] = [];
   for (let i = 0; i < filteredHookah.length; i += 2) {
     hookahPairs.push(filteredHookah.slice(i, i + 2));
@@ -48,7 +63,9 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
       <SearchOverlay
         isOpen={isSearchActive}
         onClose={() => setIsSearchActive(false)}
-        onSearch={() => setIsSearchActive(false)}
+        onSearch={(text) => setSearchQuery(text)}
+        initialQuery={searchQuery}
+        items={hookahItems}
       />
       <FilterModal
         isOpen={isFilterModalOpen}
@@ -76,14 +93,14 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
       )}
 
       {/* Header */}
-      <div className="max-w-[393px] mx-auto relative px-[21px] box-border">
+      <div className="max-w-[393px] mx-auto relative px-[15px] box-border">
         {/* Logo */}
         <div className="flex justify-center pt-[29px] pb-[10px]">
           <img src="/logo.png" alt="CSAT" className="w-[100px] h-[35px] object-contain" />
         </div>
 
         {/* Category cards */}
-        <div className="flex flex-row items-center gap-[25px] w-[320px] h-[110px] mx-auto mb-5">
+        <div className="flex flex-row items-center gap-[25px] w-[290px] h-[100px] mx-auto mb-5">
           <CategoryCard
             label="Food"
             img="https://images.pexels.com/photos/1639562/pexels-photo-1639562.jpeg?auto=compress&cs=tinysrgb&w=200"
@@ -104,7 +121,7 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
 
       {/* Nav tabs */}
       <div className="max-w-[393px] mx-auto mt-3">
-        <div className="flex flex-row items-start gap-[30px] pl-[15px] pr-[15px] overflow-x-auto [scrollbar-width:none] w-full box-border">
+        <div className="flex flex-row items-start justify-between overflow-x-auto [scrollbar-width:none] w-full box-border">
           {TOBACCO_TABS.map((tab) => {
             const tabKey = tab.toLowerCase().replace(/ /g, '');
             const isActive = activeTab === tabKey;
@@ -130,7 +147,7 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
       </div>
 
       {/* Scrollable content */}
-      <div className="max-w-[393px] mx-auto px-[21px] box-border pt-4">
+      <div className="max-w-[393px] mx-auto px-[15px] box-border pt-4">
         {/* Search bar */}
         <div className="box-border w-full h-[35px] bg-brand-white border-[0.6px] border-brand-border shadow-[1px_2px_2px_rgba(255,255,255,0.3)] rounded-[50px] mb-5 flex flex-row justify-between items-center py-[7px] px-[14px]">
           <div className="flex flex-row justify-between items-center w-full">
@@ -175,7 +192,7 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
           {hookahPairs.map((pair, rowIdx) => (
             <div
               key={rowIdx}
-              className="relative w-[351px] h-[232px] shrink-0"
+              className="relative w-[363px] h-[232px] shrink-0"
             >
               {pair.map((hookah, colIdx) => (
                 <HookahCard
@@ -222,14 +239,13 @@ function HookahCard({
   onClick: () => void;
   row2?: boolean;
 }) {
-  const badgeWidth = hookah.badge === "Chef's special" || hookah.badge === 'Signature' ? '91px' : '125px';
 
   return (
     <div
       onClick={onClick}
       className="flex flex-col items-start gap-[2px] absolute w-[138px] h-[210px] cursor-pointer"
       style={{
-        left: colIdx === 0 ? "12.6px" : "200.5px",
+        left: colIdx === 0 ? "0px" : "225px",
         top: "0px",
       }}
     >
@@ -247,17 +263,6 @@ function HookahCard({
             className="w-full h-full object-cover"
           />
         </div>
-        {/* Badge */}
-        {hookah.badge && (
-          <div
-            className="absolute left-0 top-[103px] h-[20px] bg-brand-accent rounded-[2px] flex justify-center items-center px-[3px]"
-            style={{ width: badgeWidth }}
-          >
-            <span className="font-playfair font-semibold text-[12px] leading-[14px] text-white whitespace-nowrap">
-              {hookah.badge}
-            </span>
-          </div>
-        )}
       </div>
       {/* Text block */}
       <div className="flex flex-col items-start gap-[3px] w-[138px]">

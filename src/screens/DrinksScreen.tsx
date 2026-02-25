@@ -25,6 +25,7 @@ export default function DrinksScreen({
   const [activeFilters, setActiveFilters] = useState(0);
   const [alcoholicMode, setAlcoholicMode] = useState<"ALCOHOLIC" | "NON-ALCOHOLIC">("ALCOHOLIC");
   const [activeTab, setActiveTab] = useState("Beer");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const ALL_DRINK_TABS = [
     "Beer", "Soft Drink", "Mocktail", "Shakes", "Signature Cocktail", 
@@ -33,14 +34,21 @@ export default function DrinksScreen({
     "TEQUILA", "RUM", "Hard liquor", "SPARKLING WINE", "RED WINE", "WHITE WINE"
   ];
 
-  // Calculate which tabs actually have items based on the current alcoholic mode
-  const DRINK_TABS = ALL_DRINK_TABS.filter(catName => {
+  const NON_ALCOHOLIC_CATEGORIES = ["Soft Drink", "Mocktail", "Shakes"];
+
+  // Calculate which tabs actually have items based on the current alcoholic mode and search
+  const DRINK_TABS = ALL_DRINK_TABS.filter((catName: string) => {
+    const isCatNonAlcoholic = NON_ALCOHOLIC_CATEGORIES.includes(catName);
+    const modeMatch = alcoholicMode === "NON-ALCOHOLIC" ? isCatNonAlcoholic : !isCatNonAlcoholic;
+    if (!modeMatch) return false;
+
     return drinks.some(drink => {
       if (drink.category !== catName) return false;
-      const nonAlcoholicCategories = ["Soft Drink", "Mocktail", "Shakes", "Brewed drinks"];
-      const isNonAlcoholic = nonAlcoholicCategories.includes(drink.category || "");
-      if (alcoholicMode === "NON-ALCOHOLIC") return isNonAlcoholic;
-      return !isNonAlcoholic;
+
+      const searchMatch = !searchQuery || 
+        drink.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        drink.category?.toLowerCase().includes(searchQuery.toLowerCase());
+      return searchMatch;
     });
   });
 
@@ -51,15 +59,19 @@ export default function DrinksScreen({
     }
   }, [DRINK_TABS, activeTab]);
 
-  // Filter drinks based on tab and alcoholic mode
+  // Filter drinks based on tab, alcoholic mode and search query
   const filteredDrinks = drinks.filter((drink) => {
     // Basic tab match
     if (drink.category !== activeTab) return false;
 
+    // Search match
+    const searchMatch = !searchQuery || 
+      drink.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      drink.category?.toLowerCase().includes(searchQuery.toLowerCase());
+    if (!searchMatch) return false;
+
     // Alcoholic mode match
-    // Non-alcoholic categories: Soft Drink, Mocktail, Shakes
-    const nonAlcoholicCategories = ["Soft Drink", "Mocktail", "Shakes"];
-    const isNonAlcoholic = nonAlcoholicCategories.includes(
+    const isNonAlcoholic = NON_ALCOHOLIC_CATEGORIES.includes(
       drink.category || "",
     );
 
@@ -70,7 +82,7 @@ export default function DrinksScreen({
     }
   });
 
-  // Group drinks into pairs for the staggered grid
+  // Group drinks into pairs for the grid
   const drinkPairs: Drink[][] = [];
   for (let i = 0; i < filteredDrinks.length; i += 2) {
     drinkPairs.push(filteredDrinks.slice(i, i + 2));
@@ -81,7 +93,9 @@ export default function DrinksScreen({
       <SearchOverlay
         isOpen={isSearchActive}
         onClose={() => setIsSearchActive(false)}
-        onSearch={() => setIsSearchActive(false)}
+        onSearch={(text) => setSearchQuery(text)}
+        initialQuery={searchQuery}
+        items={drinks}
       />
       <FilterModal
         isOpen={isFilterModalOpen}
@@ -109,7 +123,7 @@ export default function DrinksScreen({
       )}
 
       {/* Header */}
-      <div className="max-w-[393px] mx-auto relative px-[21px] box-border">
+      <div className="max-w-[393px] mx-auto relative px-[15px] box-border">
         {/* Logo */}
         <div className="flex justify-center pt-[29px] pb-[10px]">
           <img
@@ -120,7 +134,7 @@ export default function DrinksScreen({
         </div>
 
         {/* Category cards */}
-        <div className="flex flex-row items-center gap-[25px] w-[320px] h-[110px] mx-auto mb-5">
+        <div className="flex flex-row items-center gap-[25px] w-[290px] h-[100px] mx-auto mb-5">
           <CategoryCard
             label="Food"
             img="https://images.pexels.com/photos/1639562/pexels-photo-1639562.jpeg?auto=compress&cs=tinysrgb&w=200"
@@ -139,7 +153,7 @@ export default function DrinksScreen({
         </div>
 
         {/* Alcoholic / Non-alcoholic toggle */}
-        <div className="box-border w-[351px] h-[36px] bg-white border-[0.6px] border-brand-border shadow-[0px_2.3px_2px_rgba(124,63,32,0.25)] rounded-[50px] flex flex-row items-center p-[3px_11px_3px_3px] gap-[10px] mx-auto">
+        <div className="box-border w-full h-[36px] bg-white border-[0.6px] border-brand-border shadow-[0px_2.3px_2px_rgba(124,63,32,0.25)] rounded-[50px] flex flex-row items-center p-[3px_11px_3px_3px] gap-[10px] mx-auto">
           {/* ALCOHOLIC pill */}
           <button
             onClick={() => setAlcoholicMode("ALCOHOLIC")}
@@ -169,7 +183,10 @@ export default function DrinksScreen({
 
       {/* Nav tabs */}
       <div className="max-w-[393px] mx-auto mt-3">
-        <div className="flex flex-row items-start gap-[30px] pl-[15px] pr-[15px] overflow-x-auto [scrollbar-width:none] w-full box-border">
+        <div className={[
+          "flex flex-row items-start overflow-x-auto [scrollbar-width:none] w-full box-border",
+          DRINK_TABS.length <= 4 ? "justify-between" : "gap-[30px]"
+        ].join(" ")}>
           {DRINK_TABS.map((tab) => {
             const isActive = activeTab === tab;
             return (
@@ -197,7 +214,7 @@ export default function DrinksScreen({
       </div>
 
       {/* Scrollable content */}
-      <div className="max-w-[393px] mx-auto px-[21px] box-border pt-4">
+      <div className="max-w-[393px] mx-auto px-[15px] box-border pt-4">
         {/* Search bar */}
         <div className="box-border w-full h-[35px] bg-brand-white border-[0.6px] border-brand-border shadow-[1px_2px_2px_rgba(255,255,255,0.3)] rounded-[50px] mb-5 flex flex-row justify-between items-center py-[7px] px-[14px]">
           <div className="flex flex-row justify-between items-center w-full">
@@ -289,11 +306,11 @@ export default function DrinksScreen({
         </div>
 
         {/* Drink grid */}
-        <div className="flex flex-col items-center gap-5 w-[314px] mx-auto">
+        <div className="flex flex-col items-center gap-5 w-full">
           {drinkPairs.map((pair, rowIdx) => (
             <React.Fragment key={rowIdx}>
               <div
-                className="relative w-[314px] h-[212px] shrink-0"
+                className="relative w-[363px] h-[232px] shrink-0"
                 style={{ opacity: activeFilters > 0 ? 0.8 : 1 }}
               >
                 {pair.map((drink, colIdx) => (
@@ -313,7 +330,7 @@ export default function DrinksScreen({
                   activeTab === "Classic Cocktail") &&
                 alcoholicMode === "ALCOHOLIC" && (
                   <div
-                    className="box-border relative overflow-hidden w-[351px] h-[162px] bg-grad-promo border border-brand-accent shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[5px] shrink-0 cursor-pointer"
+                    className="box-border relative overflow-hidden w-[363px] h-[162px] bg-grad-promo border border-brand-accent shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[5px] shrink-0 cursor-pointer"
                     style={{ opacity: activeFilters > 0 ? 0.8 : 1 }}
                     onClick={onNavigateToSpecials}
                   >
@@ -374,22 +391,22 @@ function DrinkCard({
   onClick: () => void;
   row2?: boolean;
 }) {
+  const badgeWidth = drink.badge === "Chef's special" || drink.badge === 'Signature' ? '91px' : '125px';
   // Row 2 col 0 image is offset left:13.23; rows 1&3 col 0 image is left:0
   const imgLeft = row2 || colIdx === 1 ? "13.23px" : "0px";
 
   return (
     <div
       onClick={onClick}
-      className="flex flex-col items-start gap-[2px] absolute w-[127px] h-[198px] cursor-pointer"
+      className="flex flex-col items-start gap-[2px] absolute w-[138px] h-[210px] cursor-pointer"
       style={{
-        left: colIdx === 0 ? "0px" : "187px",
-        top: colIdx === 0 ? "0px" : "14px",
+        left: colIdx === 0 ? "0px" : "225px",
+        top: "0px",
       }}
     >
       {/* Image container */}
       <div
-        className="relative shrink-0 h-[123px]"
-        style={{ width: colIdx === 0 && !row2 ? "109px" : "122.23px" }}
+        className="relative shrink-0 w-full h-[123px]"
       >
         <div
           className="box-border absolute w-[109px] h-[109px] top-0 border-[0.4px] border-[rgba(125,121,121,0.7)] rounded-[3px] overflow-hidden"
@@ -401,20 +418,22 @@ function DrinkCard({
             className="w-full h-full object-cover"
           />
         </div>
-        {/* Signature badge */}
-        <div
-          className="flex flex-row justify-center items-center px-[3px] gap-[10px] absolute w-[91px] h-[20px] top-[103px] bg-brand-accent rounded-[2px]"
-          style={{ left: colIdx === 0 && !row2 ? "7.77px" : "0px" }}
-        >
-          <span className="font-playfair font-semibold text-[12px] leading-[14px] text-white">
-            Signature
-          </span>
-        </div>
+        {/* Badge */}
+        {drink.badge && (
+          <div
+            className="absolute left-0 top-[103px] h-[20px] bg-brand-accent rounded-[2px] flex justify-center items-center px-[3px]"
+            style={{ width: badgeWidth }}
+          >
+            <span className="font-playfair font-semibold text-[12px] leading-[14px] text-white whitespace-nowrap">
+              {drink.badge}
+            </span>
+          </div>
+        )}
       </div>
       {/* Text block */}
-      <div className="flex flex-col items-start gap-[3px] w-[127px]">
-        <div className="flex flex-col items-start gap-[1px] w-[155px]">
-          <span className="font-playfair font-medium text-[18px] leading-[22px] text-brand-brown block">
+      <div className="flex flex-col items-start gap-[3px] w-[138px]">
+        <div className="flex flex-col items-start gap-[1px] w-full">
+          <span className="font-playfair font-medium text-[17px] leading-[21px] text-brand-brown block line-clamp-2">
             {drink.name}
           </span>
           <div className="flex flex-row items-center gap-[20px] w-[123px] h-[15px]">
@@ -423,7 +442,7 @@ function DrinkCard({
             </span>
           </div>
         </div>
-        <p className="font-inter font-normal text-[12px] leading-[18px] tracking-[0.02em] text-brand-muted m-0 w-[127px]">
+        <p className="font-inter font-normal text-[12px] leading-[18px] tracking-[0.02em] text-brand-muted m-0 w-[127px] line-clamp-2">
           {drink.description}
         </p>
       </div>

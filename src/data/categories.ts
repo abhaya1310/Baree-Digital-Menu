@@ -20,13 +20,25 @@ export const foodCategories: CategoryDefinition[] = [
 // Drink categories displayed in the drink categories modal.
 // Figma: Cocktails, Brewed drinks, Wine, Hard liquor, Beer, Shots, Aperitifs
 export const drinkCategories: CategoryDefinition[] = [
-  { name: 'Cocktails', image: 'https://images.pexels.com/photos/1189257/pexels-photo-1189257.jpeg?auto=compress&cs=tinysrgb&w=300' },
-  { name: 'Brewed drinks', image: 'https://images.pexels.com/photos/302899/pexels-photo-302899.jpeg?auto=compress&cs=tinysrgb&w=300' },
-  { name: 'Wine', image: 'https://images.pexels.com/photos/2912108/pexels-photo-2912108.jpeg?auto=compress&cs=tinysrgb&w=300' },
-  { name: 'Hard liquor', image: 'https://images.pexels.com/photos/602750/pexels-photo-602750.jpeg?auto=compress&cs=tinysrgb&w=300' },
+  { name: 'Soft Drink', image: 'https://images.pexels.com/photos/1189257/pexels-photo-1189257.jpeg?auto=compress&cs=tinysrgb&w=300' },
+  { name: 'Mocktail', image: 'https://images.pexels.com/photos/1189257/pexels-photo-1189257.jpeg?auto=compress&cs=tinysrgb&w=300' },
+  { name: 'Shakes', image: 'https://images.pexels.com/photos/1189257/pexels-photo-1189257.jpeg?auto=compress&cs=tinysrgb&w=300' },
+  { name: 'Signature Cocktail', image: 'https://images.pexels.com/photos/1189257/pexels-photo-1189257.jpeg?auto=compress&cs=tinysrgb&w=300' },
+  { name: 'Classic Cocktail', image: 'https://images.pexels.com/photos/1189257/pexels-photo-1189257.jpeg?auto=compress&cs=tinysrgb&w=300' },
   { name: 'Beer', image: 'https://images.pexels.com/photos/5537949/pexels-photo-5537949.jpeg?auto=compress&cs=tinysrgb&w=300' },
-  { name: 'Shots', image: 'https://images.pexels.com/photos/4109939/pexels-photo-4109939.jpeg?auto=compress&cs=tinysrgb&w=300' },
-  { name: 'Aperitifs', image: 'https://images.pexels.com/photos/338713/pexels-photo-338713.jpeg?auto=compress&cs=tinysrgb&w=300' },
+  { name: 'Single Malt Whiskey', image: 'https://images.pexels.com/photos/602750/pexels-photo-602750.jpeg?auto=compress&cs=tinysrgb&w=300' },
+  { name: 'American Whisky', image: 'https://images.pexels.com/photos/602750/pexels-photo-602750.jpeg?auto=compress&cs=tinysrgb&w=300' },
+  { name: 'Blended Scotch Whiskey', image: 'https://images.pexels.com/photos/602750/pexels-photo-602750.jpeg?auto=compress&cs=tinysrgb&w=300' },
+  { name: 'SHORTS', image: 'https://images.pexels.com/photos/4109939/pexels-photo-4109939.jpeg?auto=compress&cs=tinysrgb&w=300' },
+  { name: 'LIQUERS', image: 'https://images.pexels.com/photos/602750/pexels-photo-602750.jpeg?auto=compress&cs=tinysrgb&w=300' },
+  { name: 'GIN', image: 'https://images.pexels.com/photos/602750/pexels-photo-602750.jpeg?auto=compress&cs=tinysrgb&w=300' },
+  { name: 'VODKA', image: 'https://images.pexels.com/photos/602750/pexels-photo-602750.jpeg?auto=compress&cs=tinysrgb&w=300' },
+  { name: 'TEQUILA', image: 'https://images.pexels.com/photos/602750/pexels-photo-602750.jpeg?auto=compress&cs=tinysrgb&w=300' },
+  { name: 'RUM', image: 'https://images.pexels.com/photos/602750/pexels-photo-602750.jpeg?auto=compress&cs=tinysrgb&w=300' },
+  { name: 'Hard liquor', image: 'https://images.pexels.com/photos/602750/pexels-photo-602750.jpeg?auto=compress&cs=tinysrgb&w=300' },
+  { name: 'SPARKLING WINE', image: 'https://images.pexels.com/photos/2912108/pexels-photo-2912108.jpeg?auto=compress&cs=tinysrgb&w=300' },
+  { name: 'RED WINE', image: 'https://images.pexels.com/photos/2912108/pexels-photo-2912108.jpeg?auto=compress&cs=tinysrgb&w=300' },
+  { name: 'WHITE WINE', image: 'https://images.pexels.com/photos/2912108/pexels-photo-2912108.jpeg?auto=compress&cs=tinysrgb&w=300' },
 ];
 
 // Hookah (Tobacco) categories

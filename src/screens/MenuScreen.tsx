@@ -47,7 +47,7 @@ function DishCard({ dish, onClick, cardWidth = 138 }: { dish: Dish; onClick: () 
 
       {/* text column */}
       <div className="flex flex-col gap-[3px]" style={{ width: `${cardWidth}px` }}>
-        <span className="font-playfair font-medium text-[18px] leading-[22px] text-brand-brown block">
+        <span className="font-playfair font-medium text-[18px] leading-[22px] text-brand-brown block line-clamp-2">
           {dish.name}
         </span>
         {/* price + time row */}
@@ -69,7 +69,7 @@ function DishCard({ dish, onClick, cardWidth = 138 }: { dish: Dish; onClick: () 
         </div>
         {/* description */}
         {dish.description && (
-          <p className="font-inter font-normal text-[12px] leading-[18px] tracking-[0.02em] text-brand-muted m-0">
+          <p className="font-inter font-normal text-[12px] leading-[18px] tracking-[0.02em] text-brand-muted m-0 line-clamp-2">
             {dish.description}
           </p>
         )}
@@ -80,22 +80,29 @@ function DishCard({ dish, onClick, cardWidth = 138 }: { dish: Dish; onClick: () 
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, onNavigateToTobacco }: MenuScreenProps) {
-  const [activeTab, setActiveTab] = useState('meals');
+  const [activeTab, setActiveTab] = useState('maincourse');
   const [filterType, setFilterType] = useState<'ALL' | 'VEG' | 'NON-VEG'>('ALL');
   const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [activeFilterCount, setActiveFilterCount] = useState(0);
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const ALL_CATEGORIES = ['Meals', 'Desserts', 'Pizza', 'Sushi', 'Burger', 'Dimsum', 'Pasta', 'Noodles', 'Breakfast'];
+  const ALL_CATEGORIES = ['Main Course', 'Desserts', 'Pizza', 'Sushi', 'Burger', 'Dimsum', 'Pasta', 'Noodles', 'Breakfast', 'G Bar Nibbles', 'Rice Bowl', 'Jain Food', 'Baby Food', 'Add-on', 'Curry', 'Rice', 'Fried Rice', 'Bread'];
 
-  // Calculate which tabs actually have items based on the current veg/non-veg filter
+  // Calculate which tabs actually have items based on the current veg/non-veg filter and search
   const CATEGORY_TABS = ALL_CATEGORIES.filter(catName => {
     const catLower = catName.toLowerCase().replace(/ /g, '');
     return dishes.some(d => {
       const dishCat = d.category?.toLowerCase().replace(/ /g, '') || '';
       if (dishCat !== catLower) return false;
+      
+      const searchMatch = !searchQuery || 
+        d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        d.category?.toLowerCase().includes(searchQuery.toLowerCase());
+      if (!searchMatch) return false;
+
       if (filterType === 'VEG') return d.isVeg === true;
       if (filterType === 'NON-VEG') return d.isVeg === false;
       return true;
@@ -113,6 +120,11 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
   const filteredDishes = dishes.filter((d) => {
     const dishTab = d.category?.toLowerCase().replace(/ /g, '') || '';
     if (dishTab !== activeTab) return false;
+
+    const searchMatch = !searchQuery || 
+      d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      d.category?.toLowerCase().includes(searchQuery.toLowerCase());
+    if (!searchMatch) return false;
 
     if (filterType === 'VEG') return d.isVeg === true;
     if (filterType === 'NON-VEG') return d.isVeg === false;
@@ -145,10 +157,12 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
       <SearchOverlay
         isOpen={isSearchActive}
         onClose={() => setIsSearchActive(false)}
-        onSearch={() => setIsSearchActive(false)}
+        onSearch={(text) => setSearchQuery(text)}
+        initialQuery={searchQuery}
+        items={dishes}
       />
 
-      <div className="max-w-[393px] mx-auto relative px-5 box-border">
+      <div className="max-w-[393px] mx-auto relative px-[15px] box-border">
 
         {/* Logo */}
         <div className="flex justify-center pt-[30px] pb-[10px]">
@@ -156,7 +170,7 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
         </div>
 
         {/* Category cards row */}
-        <div className="flex flex-row items-center gap-[25px] w-[320px] h-[110px] mx-auto mb-5">
+        <div className="flex flex-row items-center gap-[25px] w-[290px] h-[100px] mx-auto mb-5">
           <CategoryCard
             label="Food"
             img="https://images.pexels.com/photos/1639562/pexels-photo-1639562.jpeg?auto=compress&cs=tinysrgb&w=200"
@@ -175,8 +189,8 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
         </div>
 
         {/* Veg / All / Non-veg pill bar */}
-        <div className="w-[351px] h-[36px] rounded-[50px] border-[0.6px] border-brand-border shadow-[0px_2.3px_2px_rgba(124,63,32,0.25)] p-[3px] bg-brand-white box-border flex items-center mx-auto mb-4">
-          <div className="flex flex-row items-center gap-[11px] w-[334px] h-[30px]">
+        <div className="w-full h-[36px] rounded-[50px] border-[0.6px] border-brand-border shadow-[0px_2.3px_2px_rgba(124,63,32,0.25)] p-[3px] bg-brand-white box-border flex items-center mx-auto mb-4">
+          <div className="flex flex-row items-center gap-[10px] w-full h-[30px]">
             {(['ALL', 'VEG', 'NON-VEG'] as const).map((f) => {
               const active = filterType === f;
               const pillWidth = active && f === 'NON-VEG' ? '112px' : '104px';
@@ -185,7 +199,7 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
                   key={f}
                   onClick={() => setFilterType(f)}
                   className={[
-                    'h-[29px] rounded-[50px] cursor-pointer font-inter font-medium text-[14px] leading-[17px] transition-[background,color] duration-200 shrink-0 border-0 flex items-center justify-center',
+                    'flex-1 h-[29px] rounded-[50px] cursor-pointer font-inter font-medium text-[14px] leading-[17px] transition-[background,color] duration-200 shrink-0 border-0 flex items-center justify-center',
                     active
                       ? 'bg-brand-brown border-[0.2px] border-brand-border text-white'
                       : 'bg-white text-brand-brown opacity-80',
@@ -200,8 +214,8 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
         </div>
 
         {/* Nav tabs */}
-        <div className="-mx-5">
-          <div className="flex flex-row items-start gap-[28px] pl-4 pr-4 overflow-x-auto [scrollbar-width:none]">
+        <div className="mt-3">
+          <div className="flex flex-row items-start gap-[28px] overflow-x-auto [scrollbar-width:none]">
             {CATEGORY_TABS.map((tab) => {
               const isOffers = tab === 'Offers for you';
               const tabKey = tab.toLowerCase().replace(/ /g, '');
@@ -285,14 +299,14 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
             <>
               {/* Row 1: first 2 dishes — staggered */}
               {filteredDishes.slice(0, 2).length > 0 && (
-                <div className="relative w-[351px] h-[232px] shrink-0">
+                <div className="relative w-[363px] h-[232px] shrink-0">
                   {filteredDishes[0] && (
-                    <div className="absolute top-0" style={{ left: '12.6px' }}>
+                    <div className="absolute top-0" style={{ left: '0px' }}>
                       <DishCard dish={filteredDishes[0]} onClick={() => setSelectedDish(filteredDishes[0])} />
                     </div>
                   )}
                   {filteredDishes[1] && (
-                    <div className="absolute top-[14px]" style={{ left: '200.5px' }}>
+                    <div className="absolute top-0" style={{ left: '225px' }}>
                       <DishCard dish={filteredDishes[1]} onClick={() => setSelectedDish(filteredDishes[1])} />
                     </div>
                   )}
@@ -321,14 +335,14 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
                   rows.push(remaining.slice(i, i + 2));
                 }
                 return rows.map((rowDishes, rowIndex) => (
-                  <div key={rowIndex} className="relative w-[351px] h-[232px] shrink-0">
+                  <div key={rowIndex} className="relative w-[363px] h-[232px] shrink-0">
                     {rowDishes[0] && (
-                      <div className="absolute top-0" style={{ left: '12.39px' }}>
+                      <div className="absolute top-0" style={{ left: '0px' }}>
                         <DishCard dish={rowDishes[0]} onClick={() => setSelectedDish(rowDishes[0])} />
                       </div>
                     )}
                     {rowDishes[1] && (
-                      <div className="absolute top-[14px]" style={{ left: '200.5px' }}>
+                      <div className="absolute top-0" style={{ left: '225px' }}>
                         <DishCard dish={rowDishes[1]} onClick={() => setSelectedDish(rowDishes[1])} />
                       </div>
                     )}
@@ -338,7 +352,7 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
 
               {/* 2-for-1 Special card */}
               <div
-                className="relative overflow-hidden w-[351px] h-[162px] bg-grad-promo border border-brand-accent shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[5px] box-border cursor-pointer shrink-0"
+                className="relative overflow-hidden w-[363px] h-[162px] bg-grad-promo border border-brand-accent shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[5px] box-border cursor-pointer shrink-0"
                 onClick={onNavigateToSpecials}
               >
                 <div className="absolute left-4 top-[11px] flex flex-col gap-[10px] w-[172px] z-10">
