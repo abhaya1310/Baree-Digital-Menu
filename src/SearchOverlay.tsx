@@ -31,7 +31,9 @@ function ArrowBold() {
 
 const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items = [] }: SearchOverlayProps) => {
   const [query, setQuery] = useState(initialQuery);
+  const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -122,17 +124,26 @@ const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items = [
                   ref={inputRef}
                   type="text"
                   value={query}
-                  onChange={e => {
-                    const val = e.target.value;
-                    setQuery(val);
-                    // Proactive search as you type
-                    if (val.length > 2) {
-                      onSearch(val);
-                    } else if (val.length === 0) {
-                      onSearch('');
-                    }
-                  }}
-                  placeholder="Search items, categories....."
+                    onChange={e => {
+                      const val = e.target.value;
+                      setQuery(val);
+                      
+                      // Show loading state when typing
+                      setIsLoading(true);
+                      
+                      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+                      
+                      searchTimeoutRef.current = setTimeout(() => {
+                        setIsLoading(false);
+                        // Proactive search as you type
+                        if (val.length > 2) {
+                          onSearch(val);
+                        } else if (val.length === 0) {
+                          onSearch('');
+                        }
+                      }, 500); // 500ms delay for loading state visibility
+                    }}
+                    placeholder="Search drinks, brands, flavors..."
                   className="bg-transparent border-none outline-none font-roboto font-normal text-[12px] leading-[14px] text-brand-muted w-full caret-brand-brown"
                 />
               </div>
@@ -163,9 +174,18 @@ const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items = [
           </div>
 
           <div className="flex flex-col items-start gap-[15px] w-full mt-4">
-            <span className="font-playfair font-medium text-[16px] leading-[19px] text-brand-brown">
-              {isTyping ? 'Suggestions' : 'Popular searches'}
-            </span>
+            <div className="flex flex-row items-center gap-[10px]">
+              <span className="font-playfair font-medium text-[16px] leading-[19px] text-brand-brown">
+                {isTyping ? 'Suggestions' : 'Popular searches'}
+              </span>
+              {isLoading && (
+                <div className="flex items-center gap-1">
+                  <div className="w-1 h-1 bg-brand-accent rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="w-1 h-1 bg-brand-accent rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="w-1 h-1 bg-brand-accent rounded-full animate-bounce"></div>
+                </div>
+              )}
+            </div>
 
             <div className="flex flex-col items-start gap-[11px] w-full">
               {suggestions.map((term, idx) => (

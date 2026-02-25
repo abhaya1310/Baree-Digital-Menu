@@ -42,14 +42,7 @@ export default function DrinksScreen({
     const modeMatch = alcoholicMode === "NON-ALCOHOLIC" ? isCatNonAlcoholic : !isCatNonAlcoholic;
     if (!modeMatch) return false;
 
-    return drinks.some(drink => {
-      if (drink.category !== catName) return false;
-
-      const searchMatch = !searchQuery || 
-        drink.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        drink.category?.toLowerCase().includes(searchQuery.toLowerCase());
-      return searchMatch;
-    });
+    return drinks.some(drink => drink.category === catName);
   });
 
   // If current activeTab is hidden, switch to first available
@@ -241,7 +234,7 @@ export default function DrinksScreen({
                 />
               </svg>
               <span className="font-roboto font-normal text-[12px] text-brand-brown opacity-60">
-                Search items...
+                Search drinks, brands, flavors...
               </span>
             </div>
             {/* Filter icon + badge */}
