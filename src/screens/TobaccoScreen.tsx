@@ -161,8 +161,8 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
               </svg>
               <span className="font-roboto font-normal text-[12px] text-brand-brown opacity-60">Search items...</span>
             </div>
-            {/* Filter icon + badge */}
-            <div
+            {/* Filter icon + badge - Disabled for now */}
+            {/* <div
               className="relative w-[23px] h-[19.5px] cursor-pointer shrink-0"
               onClick={() => setIsFilterModalOpen(true)}
             >
@@ -183,7 +183,7 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
                   </div>
                 </div>
               )}
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -206,8 +206,8 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
             </div>
           ))}
 
-          {/* Clear filters pill */}
-          {activeFilters > 0 && (
+          {/* Clear filters pill - Disabled for now */}
+          {/* {activeFilters > 0 && (
             <div className="flex justify-center w-full mt-4">
               <button
                 onClick={() => setActiveFilters(0)}
@@ -218,7 +218,7 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
                 </span>
               </button>
             </div>
-          )}
+          )} */}
         </div>
       </div>
 

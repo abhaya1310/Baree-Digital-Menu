@@ -237,53 +237,18 @@ export default function DrinksScreen({
                 Search drinks, brands, flavors...
               </span>
             </div>
-            {/* Filter icon + badge */}
-            <div
+            {/* Filter icon + badge - Disabled for now */}
+            {/* <div
               className="relative w-[23px] h-[19.5px] cursor-pointer shrink-0"
               onClick={() => setIsFilterModalOpen(true)}
             >
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 13 13"
-                fill="none"
-                className="absolute left-0 top-[6.5px]"
-              >
-                <line
-                  x1="1"
-                  y1="2.5"
-                  x2="12"
-                  y2="2.5"
-                  stroke="rgba(124, 63, 32, 0.8)"
-                  strokeWidth="1.1"
-                  strokeLinecap="round"
-                />
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" className="absolute left-0 top-[6.5px]">
+                <line x1="1" y1="2.5" x2="12" y2="2.5" stroke="rgba(124, 63, 32, 0.8)" strokeWidth="1.1" strokeLinecap="round" />
                 <circle cx="4" cy="2.5" r="1.5" fill="rgba(124, 63, 32, 0.8)" />
-                <line
-                  x1="1"
-                  y1="6.5"
-                  x2="12"
-                  y2="6.5"
-                  stroke="rgba(124, 63, 32, 0.8)"
-                  strokeWidth="1.1"
-                  strokeLinecap="round"
-                />
+                <line x1="1" y1="6.5" x2="12" y2="6.5" stroke="rgba(124, 63, 32, 0.8)" strokeWidth="1.1" strokeLinecap="round" />
                 <circle cx="9" cy="6.5" r="1.5" fill="rgba(124, 63, 32, 0.8)" />
-                <line
-                  x1="1"
-                  y1="10.5"
-                  x2="12"
-                  y2="10.5"
-                  stroke="rgba(124, 63, 32, 0.8)"
-                  strokeWidth="1.1"
-                  strokeLinecap="round"
-                />
-                <circle
-                  cx="6"
-                  cy="10.5"
-                  r="1.5"
-                  fill="rgba(124, 63, 32, 0.8)"
-                />
+                <line x1="1" y1="10.5" x2="12" y2="10.5" stroke="rgba(124, 63, 32, 0.8)" strokeWidth="1.1" strokeLinecap="round" />
+                <circle cx="6" cy="10.5" r="1.5" fill="rgba(124, 63, 32, 0.8)" />
               </svg>
               {activeFilters > 0 && (
                 <div className="absolute left-[9px] top-0 w-[14px] h-[15px]">
@@ -294,7 +259,7 @@ export default function DrinksScreen({
                   </div>
                 </div>
               )}
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -351,19 +316,19 @@ export default function DrinksScreen({
             </React.Fragment>
           ))}
 
-          {/* Clear filters pill */}
-          {activeFilters > 0 && (
-            <div className="flex justify-center w-full mt-4">
-              <button
-                onClick={() => setActiveFilters(0)}
-                className="w-[146px] h-[33px] bg-brand-accent rounded-[80px] border-0 cursor-pointer flex justify-center items-center px-[10px]"
-              >
-                <span className="font-inter font-semibold text-[13px] leading-[16px] text-white">
-                  Clear filters
-                </span>
-              </button>
-            </div>
-          )}
+          {/* Clear filters pill - Disabled for now */}
+              {/* {activeFilterCount > 0 && (
+                <div className="flex justify-center">
+                  <button
+                    onClick={() => setActiveFilterCount(0)}
+                    className="w-[146px] h-[33px] bg-brand-accent rounded-[80px] border-0 cursor-pointer flex justify-center items-center px-[10px]"
+                  >
+                    <span className="font-inter font-semibold text-[13px] leading-[16px] text-white">
+                      Clear filters
+                    </span>
+                  </button>
+                </div>
+              )} */}
         </div>
       </div>
 

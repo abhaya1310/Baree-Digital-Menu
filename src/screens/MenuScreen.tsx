@@ -188,8 +188,8 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
           />
         </div>
 
-        {/* Veg / All / Non-veg pill bar */}
-        <div className="w-full h-[36px] rounded-[50px] border-[0.6px] border-brand-border shadow-[0px_2.3px_2px_rgba(124,63,32,0.25)] p-[3px] bg-brand-white box-border flex items-center mx-auto mb-4">
+        {/* Veg / All / Non-veg pill bar - Disabled for now */}
+        {/* <div className="w-full h-[36px] rounded-[50px] border-[0.6px] border-brand-border shadow-[0px_2.3px_2px_rgba(124,63,32,0.25)] p-[3px] bg-brand-white box-border flex items-center mx-auto mb-4">
           <div className="flex flex-row items-center gap-[10px] w-full h-[30px]">
             {(['ALL', 'VEG', 'NON-VEG'] as const).map((f) => {
               const active = filterType === f;
@@ -211,7 +211,7 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
               );
             })}
           </div>
-        </div>
+        </div> */}
 
         {/* Nav tabs */}
         <div className="mt-3">
@@ -264,8 +264,8 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
             </svg>
             <span className="font-roboto font-normal text-[12px] text-brand-brown opacity-60">Search items...</span>
           </div>
-          {/* Filter icon + badge */}
-          <div
+          {/* Filter icon + badge - Disabled for now */}
+          {/* <div
             className="relative w-[23px] h-[19.5px] cursor-pointer shrink-0"
             onClick={() => setIsFilterModalOpen(true)}
           >
@@ -286,7 +286,7 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
         </div>
 
         {/* Dish grid */}

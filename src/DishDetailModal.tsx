@@ -48,19 +48,6 @@ const DishDetailModal = ({ isOpen, onClose, dish, type = 'food' }: DishDetailMod
 
   if (!isOpen) return null;
 
-  const addons: Addon[] = dish.addons || [
-    { name: 'Cut Onions',   price: 5, image: 'https://images.pexels.com/photos/144206/pexels-photo-144206.jpeg?auto=compress&cs=tinysrgb&w=100' },
-    { name: 'Lemon wedges', price: 5, image: 'https://images.pexels.com/photos/1414110/pexels-photo-1414110.jpeg?auto=compress&cs=tinysrgb&w=100' },
-    { name: 'Mint dip',     price: 5, image: 'https://images.pexels.com/photos/4061502/pexels-photo-4061502.jpeg?auto=compress&cs=tinysrgb&w=100' },
-  ];
-
-  const ingredients: string[] = dish.ingredients || [
-    'Minced lamb meat',
-    'Raw papaya paste',
-    'Kebab chinni',
-    'Ghee & saffron',
-  ];
-
   const description =
     dish.description ||
     'Traditional melt-in-mouth kebab made with finely minced meat, marinated in a secret blend of spices, and slow-cooked to perfection.';
@@ -76,7 +63,6 @@ const DishDetailModal = ({ isOpen, onClose, dish, type = 'food' }: DishDetailMod
       {/* Right-side panel — 270px, rounded left corners */}
       <div className="fixed top-0 right-0 bottom-0 w-[270px] bg-brand-cream rounded-l-[30px] z-[90] overflow-y-auto overflow-x-hidden [scrollbar-width:none]">
 
-        {/* ── Top bar: close × + kcal badge ── */}
         <div className="flex flex-row justify-between items-center w-[230px] h-[32px] mt-[35px] ml-[23px]">
           {/* Close button */}
           <button
@@ -88,22 +74,6 @@ const DishDetailModal = ({ isOpen, onClose, dish, type = 'food' }: DishDetailMod
               <line x1="12" y1="2" x2="2" y2="12" stroke="#555555" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
           </button>
-
-          {/* Kcal badge — brand-brown for all */}
-          <div
-            className="flex flex-row justify-center items-center gap-[4px] w-[93px] h-[29px] rounded-[5px] shrink-0 bg-brand-brown border-[0.7px] border-brand-border"
-          >
-            <div className="flex flex-row items-center gap-[2px]">
-              {/* Flame icon */}
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="shrink-0">
-                <path
-                  d="M9 2C9 2 11.5 5 10.5 7.5C12 6.5 12.5 4.5 12.5 4.5C13.5 6 14 8 13 10.5C12.2 12.5 10.5 14 9 14C7.5 14 5.8 12.5 5 10.5C4 8 4.5 6 6 4.5C6 4.5 6.5 7 8 7.5C7 5 9 2 9 2Z"
-                  stroke="white" strokeWidth="1.2" fill="none" strokeLinecap="round" strokeLinejoin="round"
-                />
-              </svg>
-              <span className="font-roboto font-medium text-[14px] leading-[16px] text-white">450 kcal</span>
-            </div>
-          </div>
         </div>
 
         {/* ── Image + name/price block ── */}
@@ -178,75 +148,6 @@ const DishDetailModal = ({ isOpen, onClose, dish, type = 'food' }: DishDetailMod
               {description}
             </p>
           </div>
-
-          {/* Add-ons */}
-          <div className="flex flex-col items-center gap-[10px] w-[213px]">
-            <SectionHeading
-              label="Add-ons"
-              icon={
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                  <line x1="11" y1="4" x2="11" y2="18" stroke="#7C3F20" strokeWidth="1.4" strokeLinecap="round" />
-                  <line x1="4" y1="11" x2="18" y2="11" stroke="#7C3F20" strokeWidth="1.4" strokeLinecap="round" />
-                </svg>
-              }
-            />
-            {/* Addon rows */}
-            <div className="flex flex-col items-start gap-[6px] w-[213px]">
-              {addons.map((addon, idx) => (
-                <div key={idx} className="flex flex-row items-center gap-[5px] w-[213px] h-[35px]">
-                  {/* Circle image */}
-                  <div className="relative w-[35px] h-[35px] shrink-0">
-                    <div
-                      className={[
-                        'absolute inset-0 rounded-full bg-white overflow-hidden',
-                        'border-[0.6px] border-brand-border',
-                      ].join(' ')}
-                    >
-                      <img
-                        src={addon.image}
-                        alt={addon.name}
-                        className="absolute rounded-full object-cover"
-                        style={{ left: '2.59px', top: '2.59px', width: '30.25px', height: '30.25px' }}
-                      />
-                    </div>
-                  </div>
-                  {/* Name + price */}
-                  <div className="flex flex-col items-start justify-center w-[167px] h-[32px]">
-                    <span className="font-roboto font-normal text-[12px] leading-[14px] text-brand-muted">
-                      {addon.name}
-                    </span>
-                    <span className="font-roboto font-normal text-[12px] leading-[18px] text-brand-accent">
-                      +₹{addon.price}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Main ingredients */}
-          <div className="flex flex-col items-start gap-[10px] w-[213px]">
-            <SectionHeading
-              label="Main ingredients"
-              icon={
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                  <rect x="3" y="3" width="16" height="16" rx="2" stroke="#7C3F20" strokeWidth="1.3" />
-                  <path d="M7 8H15M7 11H15M7 14H11" stroke="#7C3F20" strokeWidth="1.1" strokeLinecap="round" />
-                </svg>
-              }
-            />
-            <div className="flex flex-col items-start gap-[5px] w-[213px]">
-              {ingredients.map((ing, idx) => (
-                <span
-                  key={idx}
-                  className="font-inter font-normal text-[12px] leading-[18px] tracking-[0.02em] text-justify text-brand-muted w-[213px]"
-                >
-                  • {ing}
-                </span>
-              ))}
-            </div>
-          </div>
-
         </div>
       </div>
     </>
