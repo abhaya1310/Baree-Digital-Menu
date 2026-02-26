@@ -121,7 +121,7 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
 
       {/* Nav tabs */}
       <div className="max-w-[393px] mx-auto mt-3">
-        <div className="flex flex-row items-start justify-between overflow-x-auto [scrollbar-width:none] w-full box-border">
+        <div className="flex flex-row items-start justify-center gap-[30px] overflow-x-auto [scrollbar-width:none] w-full box-border">
           {TOBACCO_TABS.map((tab) => {
             const tabKey = tab.toLowerCase().replace(/ /g, '');
             const isActive = activeTab === tabKey;
@@ -192,7 +192,7 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
           {hookahPairs.map((pair, rowIdx) => (
             <div
               key={rowIdx}
-              className="relative w-[363px] h-[232px] shrink-0"
+              className="relative w-[351px] h-[260px] mx-auto shrink-0"
             >
               {pair.map((hookah, colIdx) => (
                 <HookahCard
@@ -243,10 +243,10 @@ function HookahCard({
   return (
     <div
       onClick={onClick}
-      className="flex flex-col items-start gap-[2px] absolute w-[138px] h-[210px] cursor-pointer"
+      className="flex flex-col items-start gap-[2px] absolute w-[138px] cursor-pointer"
       style={{
-        left: colIdx === 0 ? "0px" : "225px",
-        top: "0px",
+        left: colIdx === 0 ? "12px" : "200px",
+        top: colIdx === 0 ? "0px" : "14px",
       }}
     >
       {/* Image container */}

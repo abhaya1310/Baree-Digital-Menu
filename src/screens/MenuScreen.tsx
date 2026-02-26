@@ -80,7 +80,7 @@ function DishCard({ dish, onClick, cardWidth = 138 }: { dish: Dish; onClick: () 
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, onNavigateToTobacco }: MenuScreenProps) {
-  const [activeTab, setActiveTab] = useState('maincourse');
+  const [activeTab, setActiveTab] = useState('pizza');
   const [filterType, setFilterType] = useState<'ALL' | 'VEG' | 'NON-VEG'>('ALL');
   const [selectedDish, setSelectedDish] = useState<Dish | null>(null);
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
@@ -89,7 +89,7 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const ALL_CATEGORIES = ['Main Course', 'Desserts', 'Pizza', 'Sushi', 'Burger', 'Dimsum', 'Pasta', 'Noodles', 'Breakfast', 'G Bar Nibbles', 'Rice Bowl', 'Jain Food', 'Baby Food', 'Add-on', 'Curry', 'Rice', 'Fried Rice', 'Bread'];
+  const ALL_CATEGORIES = ['Pizza', 'Sushi', 'Burger', 'Dimsum', 'Pasta', 'Rice Bowl', 'Main Course (Veg)', 'Noodles', 'Fried Rice', 'Curry', 'Rice', 'Bread', 'Main Course (Non-Veg)', 'Add-on', 'Jain Food', 'Baby Food', 'Dessert', 'Breakfast', 'G Bar Nibbles', 'Veg'];
 
   // Calculate which tabs actually have items based on the current veg/non-veg filter and search
   const CATEGORY_TABS = ALL_CATEGORIES.filter(catName => {
@@ -188,8 +188,8 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
           />
         </div>
 
-        {/* Veg / All / Non-veg pill bar - Disabled for now */}
-        {/* <div className="w-full h-[36px] rounded-[50px] border-[0.6px] border-brand-border shadow-[0px_2.3px_2px_rgba(124,63,32,0.25)] p-[3px] bg-brand-white box-border flex items-center mx-auto mb-4">
+        {/* Veg / All / Non-veg pill bar */}
+        <div className="w-full h-[36px] rounded-[50px] border-[0.6px] border-brand-border shadow-[0px_2.3px_2px_rgba(124,63,32,0.25)] p-[3px] bg-brand-white box-border flex items-center mx-auto mb-4">
           <div className="flex flex-row items-center gap-[10px] w-full h-[30px]">
             {(['ALL', 'VEG', 'NON-VEG'] as const).map((f) => {
               const active = filterType === f;
@@ -211,7 +211,7 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
               );
             })}
           </div>
-        </div> */}
+        </div>
 
         {/* Nav tabs */}
         <div className="mt-3">
@@ -299,14 +299,14 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
             <>
               {/* Row 1: first 2 dishes — staggered */}
               {filteredDishes.slice(0, 2).length > 0 && (
-                <div className="relative w-[363px] h-[232px] shrink-0">
+                <div className="relative w-[351px] h-[260px] mx-auto shrink-0">
                   {filteredDishes[0] && (
-                    <div className="absolute top-0" style={{ left: '0px' }}>
+                    <div className="absolute" style={{ left: '12px', top: '0px' }}>
                       <DishCard dish={filteredDishes[0]} onClick={() => setSelectedDish(filteredDishes[0])} />
                     </div>
                   )}
                   {filteredDishes[1] && (
-                    <div className="absolute top-0" style={{ left: '225px' }}>
+                    <div className="absolute" style={{ left: '200px', top: '14px' }}>
                       <DishCard dish={filteredDishes[1]} onClick={() => setSelectedDish(filteredDishes[1])} />
                     </div>
                   )}
@@ -335,14 +335,14 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
                   rows.push(remaining.slice(i, i + 2));
                 }
                 return rows.map((rowDishes, rowIndex) => (
-                  <div key={rowIndex} className="relative w-[363px] h-[232px] shrink-0">
+                  <div key={rowIndex} className="relative w-[351px] h-[260px] mx-auto shrink-0">
                     {rowDishes[0] && (
-                      <div className="absolute top-0" style={{ left: '0px' }}>
+                      <div className="absolute" style={{ left: '12px', top: '0px' }}>
                         <DishCard dish={rowDishes[0]} onClick={() => setSelectedDish(rowDishes[0])} />
                       </div>
                     )}
                     {rowDishes[1] && (
-                      <div className="absolute top-0" style={{ left: '225px' }}>
+                      <div className="absolute" style={{ left: '200px', top: '14px' }}>
                         <DishCard dish={rowDishes[1]} onClick={() => setSelectedDish(rowDishes[1])} />
                       </div>
                     )}
@@ -352,7 +352,7 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
 
               {/* 2-for-1 Special card */}
               <div
-                className="relative overflow-hidden w-[363px] h-[162px] bg-grad-promo border border-brand-accent shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[5px] box-border cursor-pointer shrink-0"
+                className="relative overflow-hidden w-[351px] h-[162px] mx-auto bg-grad-promo border border-brand-accent shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[5px] box-border cursor-pointer shrink-0"
                 onClick={onNavigateToSpecials}
               >
                 <div className="absolute left-4 top-[11px] flex flex-col gap-[10px] w-[172px] z-10">

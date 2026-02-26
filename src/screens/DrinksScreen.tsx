@@ -177,8 +177,8 @@ export default function DrinksScreen({
       {/* Nav tabs */}
       <div className="max-w-[393px] mx-auto mt-3">
         <div className={[
-          "flex flex-row items-start overflow-x-auto [scrollbar-width:none] w-full box-border",
-          DRINK_TABS.length <= 4 ? "justify-between" : "gap-[30px]"
+          "flex flex-row items-start gap-[30px] overflow-x-auto [scrollbar-width:none] w-full box-border",
+          DRINK_TABS.length <= 4 ? "justify-center" : "px-[15px]"
         ].join(" ")}>
           {DRINK_TABS.map((tab) => {
             const isActive = activeTab === tab;
@@ -268,7 +268,7 @@ export default function DrinksScreen({
           {drinkPairs.map((pair, rowIdx) => (
             <React.Fragment key={rowIdx}>
               <div
-                className="relative w-[363px] h-[232px] shrink-0"
+                className="relative w-[351px] h-[260px] mx-auto shrink-0"
                 style={{ opacity: activeFilters > 0 ? 0.8 : 1 }}
               >
                 {pair.map((drink, colIdx) => (
@@ -288,7 +288,7 @@ export default function DrinksScreen({
                   activeTab === "Classic Cocktail") &&
                 alcoholicMode === "ALCOHOLIC" && (
                   <div
-                    className="box-border relative overflow-hidden w-[363px] h-[162px] bg-grad-promo border border-brand-accent shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[5px] shrink-0 cursor-pointer"
+                    className="box-border relative overflow-hidden w-[351px] h-[162px] mx-auto bg-grad-promo border border-brand-accent shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[5px] shrink-0 cursor-pointer"
                     style={{ opacity: activeFilters > 0 ? 0.8 : 1 }}
                     onClick={onNavigateToSpecials}
                   >
@@ -350,16 +350,15 @@ function DrinkCard({
   row2?: boolean;
 }) {
   const badgeWidth = drink.badge === "Chef's special" || drink.badge === 'Signature' ? '91px' : '125px';
-  // Row 2 col 0 image is offset left:13.23; rows 1&3 col 0 image is left:0
-  const imgLeft = row2 || colIdx === 1 ? "13.23px" : "0px";
+  const imgLeft = "13px";
 
   return (
     <div
       onClick={onClick}
-      className="flex flex-col items-start gap-[2px] absolute w-[138px] h-[210px] cursor-pointer"
+      className="flex flex-col items-start gap-[2px] absolute w-[138px] cursor-pointer"
       style={{
-        left: colIdx === 0 ? "0px" : "225px",
-        top: "0px",
+        left: colIdx === 0 ? "12px" : "200px",
+        top: colIdx === 0 ? "0px" : "14px",
       }}
     >
       {/* Image container */}

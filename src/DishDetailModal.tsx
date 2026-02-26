@@ -56,7 +56,7 @@ const DishDetailModal = ({ isOpen, onClose, dish, type = 'food' }: DishDetailMod
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-[80] bg-[rgba(124,63,32,0.4)] backdrop-blur-sm"
+        className="fixed inset-0 z-[80] bg-[rgba(22,43,57,0.7)] backdrop-blur-sm"
         onClick={onClose}
       />
 
