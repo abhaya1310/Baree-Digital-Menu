@@ -282,37 +282,7 @@ export default function DrinksScreen({
                 ))}
               </div>
 
-              {/* Insert promo card after row 1 (index 0) if it's a cocktails tab */}
-              {rowIdx === 0 &&
-                (activeTab === "Signature Cocktail" ||
-                  activeTab === "Classic Cocktail") &&
-                alcoholicMode === "ALCOHOLIC" && (
-                  <div
-                    className="box-border relative overflow-hidden w-[351px] h-[162px] mx-auto bg-grad-promo border border-brand-accent shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[5px] shrink-0 cursor-pointer"
-                    style={{ opacity: activeFilters > 0 ? 0.8 : 1 }}
-                    onClick={onNavigateToSpecials}
-                  >
-                    <div className="absolute left-4 top-[17px] flex flex-col gap-[10px] w-[172px] h-[140px] z-10">
-                      <span className="font-playfair font-medium text-[25px] leading-[30px] text-brand-cream">
-                        Buy 1, get 1 special
-                      </span>
-                      <span className="font-inter font-normal text-[12px] leading-[18px] tracking-[0.02em] text-brand-cream">
-                        Buy a cocktail of above ₹250, and get another cocktails
-                        for absolutely free.
-                      </span>
-                    </div>
-                    <div
-                      className="absolute w-[217px] h-[217px] rounded-full overflow-hidden shadow-[-4px_-5px_9px_brand-brownMid]"
-                      style={{ left: "194px", top: "-15px" }}
-                    >
-                      <img
-                        src="/drinks.png"
-                        alt="Buy 1 Get 1"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-                )}
+
             </React.Fragment>
           ))}
 

@@ -350,26 +350,7 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
                 ));
               })()}
 
-              {/* 2-for-1 Special card */}
-              <div
-                className="relative overflow-hidden w-[351px] h-[162px] mx-auto bg-grad-promo border border-brand-accent shadow-[0px_4px_4px_rgba(0,0,0,0.25)] rounded-[5px] box-border cursor-pointer shrink-0"
-                onClick={onNavigateToSpecials}
-              >
-                <div className="absolute left-4 top-[11px] flex flex-col gap-[10px] w-[172px] z-10">
-                  <span className="font-playfair font-medium text-[25px] leading-[30px] text-brand-cream">
-                    2-for-1 Special
-                  </span>
-                  <span className="font-inter font-normal text-[12px] leading-[18px] tracking-[0.02em] text-brand-cream">
-                    Choose any two starters and pay for only one. The perfect way to begin your feast.
-                  </span>
-                </div>
-                <div 
-                  className="absolute w-[217px] h-[217px] rounded-full overflow-hidden shadow-[-4px_-5px_9px_brand-brownMid]" 
-                  style={{ right: '-23px', top: '-15px' }}
-                >
-                  <img src="/food.png" alt="Special" className="w-full h-full object-cover" />
-                </div>
-              </div>
+
             </>
           )}
         </div>
