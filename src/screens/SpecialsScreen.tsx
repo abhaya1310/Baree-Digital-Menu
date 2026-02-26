@@ -60,12 +60,12 @@ export default function SpecialsScreen({ onNavigateToMenu }: SpecialsScreenProps
                   Choose any two starters and pay for only one. The perfect way to begin your feast.
                 </p>
               </div>
-              <img src="/food.png" alt="food" className="w-16 h-16 object-cover rounded-lg shrink-0" />
+              <img src="/food.png" alt="food" className="w-[121px] h-[125px] object-cover rounded-lg shrink-0" />
             </div>
 
             {/* Special 2 */}
             <div className="flex items-center gap-4">
-              <img src="/drinks.png" alt="drinks" className="w-16 h-16 object-cover rounded-lg shrink-0" />
+              <img src="/drinks.png" alt="drinks" className="w-[121px] h-[125px] object-cover rounded-lg shrink-0" />
               <div className="flex-1">
                 <h3 className="font-playfair font-medium text-[22px] text-brand-brown mb-[10px]">Buy 1, get 1 special</h3>
                 <p className="font-inter font-normal text-[12px] leading-[18px] text-brand-muted m-0">
@@ -82,7 +82,7 @@ export default function SpecialsScreen({ onNavigateToMenu }: SpecialsScreenProps
                   Choose any two starters and pay for only one. The perfect way to begin your feast.
                 </p>
               </div>
-              <img src="/cake.png" alt="cake" className="w-16 h-16 object-cover rounded-lg shrink-0" />
+              <img src="/cake.png" alt="cake" className="w-[121px] h-[125px] object-cover rounded-lg shrink-0" />
             </div>
 
           </div>

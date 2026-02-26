@@ -5,7 +5,7 @@ import DrinksScreen from './screens/DrinksScreen';
 import TobaccoScreen from './screens/TobaccoScreen';
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState<'specials' | 'menu' | 'drinks' | 'tobacco'>('menu');
+  const [currentScreen, setCurrentScreen] = useState<'specials' | 'menu' | 'drinks' | 'tobacco'>('specials');
 
   return (
     <>
