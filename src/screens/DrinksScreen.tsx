@@ -28,9 +28,9 @@ export default function DrinksScreen({
   const [searchQuery, setSearchQuery] = useState("");
 
   const ALL_DRINK_TABS = [
-    "Beer", "Soft Drink", "Mocktail", "Shakes", "Signature Cocktail", 
-    "Classic Cocktail", "Single Malt Whiskey", "American Whisky", 
-    "Blended Scotch Whiskey", "SHORTS", "LIQUERS", "GIN", "VODKA", 
+    "Beer", "Soft Drink", "Mocktail", "Shakes", "Signature Cocktail",
+    "Classic Cocktail", "Single Malt Whiskey", "American Whisky",
+    "Blended Scotch Whiskey", "SHORTS", "LIQUERS", "GIN", "VODKA",
     "TEQUILA", "RUM", "Hard liquor", "SPARKLING WINE", "RED WINE", "WHITE WINE"
   ];
 
@@ -58,7 +58,7 @@ export default function DrinksScreen({
     if (drink.category !== activeTab) return false;
 
     // Search match
-    const searchMatch = !searchQuery || 
+    const searchMatch = !searchQuery ||
       drink.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       drink.category?.toLowerCase().includes(searchQuery.toLowerCase());
     if (!searchMatch) return false;
@@ -287,7 +287,7 @@ export default function DrinksScreen({
           ))}
 
           {/* Clear filters pill - Disabled for now */}
-              {/* {activeFilterCount > 0 && (
+          {/* {activeFilterCount > 0 && (
                 <div className="flex justify-center">
                   <button
                     onClick={() => setActiveFilterCount(0)}

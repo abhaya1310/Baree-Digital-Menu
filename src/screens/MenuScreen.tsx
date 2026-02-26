@@ -97,8 +97,8 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
     return dishes.some(d => {
       const dishCat = d.category?.toLowerCase().replace(/ /g, '') || '';
       if (dishCat !== catLower) return false;
-      
-      const searchMatch = !searchQuery || 
+
+      const searchMatch = !searchQuery ||
         d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         d.category?.toLowerCase().includes(searchQuery.toLowerCase());
       if (!searchMatch) return false;
@@ -121,7 +121,7 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
     const dishTab = d.category?.toLowerCase().replace(/ /g, '') || '';
     if (dishTab !== activeTab) return false;
 
-    const searchMatch = !searchQuery || 
+    const searchMatch = !searchQuery ||
       d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       d.category?.toLowerCase().includes(searchQuery.toLowerCase());
     if (!searchMatch) return false;

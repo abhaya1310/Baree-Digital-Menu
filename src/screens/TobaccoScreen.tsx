@@ -25,11 +25,11 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
   const [searchQuery, setSearchQuery] = useState("");
 
   // Calculate which tabs actually have items based on search
-  const TOBACCO_TABS = ALL_TOBACCO_TABS.filter(catName => 
+  const TOBACCO_TABS = ALL_TOBACCO_TABS.filter(catName =>
     hookahItems.some(h => {
       const catMatch = h.category?.toLowerCase() === catName.toLowerCase();
       if (!catMatch) return false;
-      const searchMatch = !searchQuery || 
+      const searchMatch = !searchQuery ||
         h.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         h.category?.toLowerCase().includes(searchQuery.toLowerCase());
       return searchMatch;
@@ -46,7 +46,7 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
   const filteredHookah = hookahItems.filter(h => {
     const tabMatch = h.category?.toLowerCase() === activeTab;
     if (!tabMatch) return false;
-    const searchMatch = !searchQuery || 
+    const searchMatch = !searchQuery ||
       h.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       h.category?.toLowerCase().includes(searchQuery.toLowerCase());
     return searchMatch;
