@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface SearchItem {
   name: string;
@@ -32,12 +32,15 @@ function ArrowBold() {
 const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items = [] }: SearchOverlayProps) => {
   const [query, setQuery] = useState(initialQuery);
   const [isLoading, setIsLoading] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      setHighlightedIndex(-1);
       setTimeout(() => { inputRef.current?.focus(); }, 100);
     } else {
       document.body.style.overflow = 'unset';
@@ -49,6 +52,19 @@ const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items = [
   useEffect(() => {
     setQuery(initialQuery);
   }, [initialQuery]);
+
+  // Reset highlight when query changes
+  useEffect(() => {
+    setHighlightedIndex(-1);
+  }, [query]);
+
+  // Cancel: clear everything and close
+  const handleCancel = useCallback(() => {
+    setQuery('');
+    onSearch('');
+    setHighlightedIndex(-1);
+    onClose();
+  }, [onSearch, onClose]);
 
   if (!isOpen) return null;
 
@@ -90,20 +106,58 @@ const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items = [
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // If a suggestion is highlighted, select it
+    if (highlightedIndex >= 0 && highlightedIndex < suggestions.length) {
+      handleSelect(suggestions[highlightedIndex]);
+      return;
+    }
     onSearch(query);
     onClose();
   };
 
+  // Keyboard navigation handler
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setHighlightedIndex(prev => {
+          const next = prev < suggestions.length - 1 ? prev + 1 : 0;
+          // Scroll highlighted item into view
+          setTimeout(() => {
+            suggestionsRef.current?.children[next]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          }, 0);
+          return next;
+        });
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setHighlightedIndex(prev => {
+          const next = prev > 0 ? prev - 1 : suggestions.length - 1;
+          setTimeout(() => {
+            suggestionsRef.current?.children[next]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          }, 0);
+          return next;
+        });
+        break;
+      case 'Escape':
+        e.preventDefault();
+        handleCancel();
+        break;
+    }
+  };
+
   return (
     <>
+      {/* Backdrop */}
       <div
         className="fixed inset-0 z-[60] bg-[rgba(124,63,32,0.3)] backdrop-blur-[2px]"
-        onClick={onClose}
+        onClick={handleCancel}
       />
 
+      {/* Overlay panel — mobile responsive */}
       <div
-        className="fixed top-0 left-1/2 -translate-x-1/2 w-[393px] max-h-[80vh] bg-brand-cream rounded-b-[10px] z-[70] flex flex-col items-start px-[13px] pt-[30px] pb-[30px] shadow-lg overflow-y-auto scrollbar-hide"
-        style={{ animation: 'slideDown 0.22s ease' }}
+        className="fixed top-0 left-1/2 -translate-x-1/2 w-[393px] max-w-[100vw] max-h-[80vh] bg-brand-cream rounded-b-[10px] z-[70] flex flex-col items-start px-[13px] pt-[30px] pb-[30px] shadow-lg overflow-y-auto scrollbar-hide"
+        style={{ animation: 'slideDown 0.22s ease', paddingTop: 'max(30px, env(safe-area-inset-top))' }}
       >
         <div className="flex flex-col items-start gap-[10px] w-full">
           <div className="flex flex-row justify-between items-center gap-[10px] w-full h-[30px]">
@@ -122,36 +176,41 @@ const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items = [
 
                 <input
                   ref={inputRef}
-                  type="text"
+                  type="search"
+                  inputMode="search"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
                   value={query}
-                    onChange={e => {
-                      const val = e.target.value;
-                      setQuery(val);
-                      
-                      // Show loading state when typing
-                      setIsLoading(true);
-                      
-                      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-                      
-                      searchTimeoutRef.current = setTimeout(() => {
-                        setIsLoading(false);
-                        // Proactive search as you type
-                        if (val.length > 2) {
-                          onSearch(val);
-                        } else if (val.length === 0) {
-                          onSearch('');
-                        }
-                      }, 500); // 500ms delay for loading state visibility
-                    }}
-                    placeholder="Search drinks, brands, flavors..."
-                  className="bg-transparent border-none outline-none font-roboto font-normal text-[12px] leading-[14px] text-brand-muted w-full caret-brand-brown"
+                  onChange={e => {
+                    const val = e.target.value;
+                    setQuery(val);
+                    
+                    // Show loading state when typing
+                    setIsLoading(true);
+                    
+                    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+                    
+                    searchTimeoutRef.current = setTimeout(() => {
+                      setIsLoading(false);
+                      // Proactive search as you type
+                      if (val.length > 2) {
+                        onSearch(val);
+                      } else if (val.length === 0) {
+                        onSearch('');
+                      }
+                    }, 500);
+                  }}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Search drinks, brands, flavors..."
+                  className="bg-transparent border-none outline-none font-roboto font-normal text-[12px] leading-[14px] text-brand-muted w-full caret-brand-brown appearance-none [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
                 />
               </div>
 
               {isTyping && (
                 <button
                   type="button"
-                  onClick={() => { setQuery(''); onSearch(''); inputRef.current?.focus(); }}
+                  onClick={() => { setQuery(''); onSearch(''); setHighlightedIndex(-1); inputRef.current?.focus(); }}
                   className="absolute right-[7px] top-[7px] w-[16px] h-[16px] bg-transparent border-none p-0 cursor-pointer flex items-center justify-center"
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -163,10 +222,11 @@ const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items = [
               )}
             </form>
 
+            {/* Cancel button — always visible when typing, clears search completely */}
             {isTyping && (
               <button
-                onClick={onClose}
-                className="bg-transparent border-none p-0 cursor-pointer font-roboto font-normal text-[14px] leading-[16px] text-black whitespace-nowrap w-[43px] h-[16px] shrink-0"
+                onClick={handleCancel}
+                className="bg-transparent border-none p-0 cursor-pointer font-roboto font-normal text-[14px] leading-[16px] text-black whitespace-nowrap w-[43px] h-[16px] shrink-0 active:opacity-60 transition-opacity"
               >
                 Cancel
               </button>
@@ -187,12 +247,20 @@ const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items = [
               )}
             </div>
 
-            <div className="flex flex-col items-start gap-[11px] w-full">
+            {/* Suggestions list with keyboard highlight support */}
+            <div ref={suggestionsRef} className="flex flex-col items-start gap-[2px] w-full" role="listbox">
               {suggestions.map((term, idx) => (
                 <div
                   key={idx}
+                  role="option"
+                  aria-selected={highlightedIndex === idx}
                   onClick={() => handleSelect(term)}
-                  className="flex flex-row justify-between items-center w-full h-[30px] border-b border-[rgba(0,0,0,0.05)] cursor-pointer hover:bg-[rgba(0,0,0,0.02)] px-1"
+                  className={[
+                    'flex flex-row justify-between items-center w-full min-h-[44px] border-b border-[rgba(0,0,0,0.05)] cursor-pointer px-2 rounded-[4px] transition-colors duration-100',
+                    highlightedIndex === idx
+                      ? 'bg-[rgba(124,63,32,0.08)]'
+                      : 'hover:bg-[rgba(0,0,0,0.02)] active:bg-[rgba(124,63,32,0.06)]',
+                  ].join(' ')}
                 >
                   <span className="font-playfair font-normal text-[13px] leading-[16px] text-brand-muted capitalize">
                     {term}
@@ -201,7 +269,7 @@ const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items = [
                 </div>
               ))}
               {isTyping && suggestions.length === 0 && (
-                <span className="font-roboto font-normal text-[13px] text-brand-muted italic">
+                <span className="font-roboto font-normal text-[13px] text-brand-muted italic py-2">
                   No matches found for "{query}"
                 </span>
               )}
