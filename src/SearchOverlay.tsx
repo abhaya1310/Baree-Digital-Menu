@@ -74,9 +74,9 @@ const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items = [
   const getSuggestions = () => {
     const uniqueNames = Array.from(new Set(items.map(item => item.name)));
     const uniqueCategories = Array.from(new Set(items.map(item => item.category).filter(Boolean))) as string[];
-    
+
     const allOptions = [...uniqueNames, ...uniqueCategories];
-    
+
     if (!isTyping) {
       // Show first 8 items as "popular"
       return allOptions.slice(0, 8);
@@ -159,6 +159,11 @@ const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items = [
         className="fixed top-0 left-1/2 -translate-x-1/2 w-[393px] max-w-[100vw] max-h-[80vh] bg-brand-cream rounded-b-[10px] z-[70] flex flex-col items-start px-[13px] pt-[30px] pb-[30px] shadow-lg overflow-y-auto scrollbar-hide"
         style={{ animation: 'slideDown 0.22s ease', paddingTop: 'max(30px, env(safe-area-inset-top))' }}
       >
+        {/* Logo */}
+        <div className="flex justify-center w-full mb-[15px]">
+          <img src="/logo.png" alt="CSAT" className="w-[100px] h-[35px] object-contain" />
+        </div>
+
         <div className="flex flex-col items-start gap-[10px] w-full">
           <div className="flex flex-row justify-between items-center gap-[10px] w-full h-[30px]">
             <form
@@ -185,12 +190,12 @@ const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items = [
                   onChange={e => {
                     const val = e.target.value;
                     setQuery(val);
-                    
+
                     // Show loading state when typing
                     setIsLoading(true);
-                    
+
                     if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-                    
+
                     searchTimeoutRef.current = setTimeout(() => {
                       setIsLoading(false);
                       // Proactive search as you type

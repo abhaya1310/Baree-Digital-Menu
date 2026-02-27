@@ -36,6 +36,28 @@ export default function DrinksScreen({
 
   const NON_ALCOHOLIC_CATEGORIES = ["Soft Drink", "Mocktail", "Shakes"];
 
+  // Auto-switch alcoholic mode based on search results
+  useEffect(() => {
+    if (searchQuery) {
+      const searchedDrinks = drinks.filter(d =>
+        d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        d.category?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+      if (searchedDrinks.length > 0) {
+        const hasNonAlcoholic = searchedDrinks.some(d => NON_ALCOHOLIC_CATEGORIES.includes(d.category || ''));
+        const hasAlcoholic = searchedDrinks.some(d => !NON_ALCOHOLIC_CATEGORIES.includes(d.category || ''));
+
+        // If current mode shows no results but opposite mode has results, switch
+        if (alcoholicMode === 'NON-ALCOHOLIC' && !hasNonAlcoholic && hasAlcoholic) {
+          setAlcoholicMode('ALCOHOLIC');
+        } else if (alcoholicMode === 'ALCOHOLIC' && !hasAlcoholic && hasNonAlcoholic) {
+          setAlcoholicMode('NON-ALCOHOLIC');
+        }
+      }
+    }
+  }, [searchQuery]);
+
   // Calculate which tabs actually have items based on the current alcoholic mode and search
   const DRINK_TABS = ALL_DRINK_TABS.filter((catName: string) => {
     const isCatNonAlcoholic = NON_ALCOHOLIC_CATEGORIES.includes(catName);
@@ -209,10 +231,10 @@ export default function DrinksScreen({
       {/* Scrollable content */}
       <div className="max-w-[393px] mx-auto px-[15px] box-border pt-4">
         {/* Search bar */}
-        <div className="box-border w-full h-[35px] bg-brand-white border-[0.6px] border-brand-border shadow-[1px_2px_2px_rgba(255,255,255,0.3)] rounded-[50px] mb-5 flex flex-row justify-between items-center py-[7px] px-[14px]">
+        <div className="box-border w-full h-[35px] bg-brand-white border-[0.6px] border-brand-border shadow-[1px_2px_2px_rgba(255,255,255,0.3)] rounded-[50px] mb-5 flex flex-row justify-between items-center py-[7px] px-[14px] transition-all duration-200">
           <div className="flex flex-row justify-between items-center w-full">
             <div
-              className="flex flex-row items-center gap-[10px] cursor-pointer flex-1"
+              className="flex flex-row items-center gap-[10px] cursor-pointer flex-1 transition-opacity duration-150 active:opacity-70"
               onClick={() => setIsSearchActive(true)}
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -233,10 +255,29 @@ export default function DrinksScreen({
                   strokeLinecap="round"
                 />
               </svg>
-              <span className="font-roboto font-normal text-[12px] text-brand-brown opacity-60">
-                Search drinks, brands, flavors...
-              </span>
+              {searchQuery ? (
+                <span className="font-roboto font-normal text-[12px] text-brand-brown">{searchQuery}</span>
+              ) : (
+                <span className="font-roboto font-normal text-[12px] text-brand-brown opacity-60">
+                  Search drinks, brands, flavors...
+                </span>
+              )}
             </div>
+            {searchQuery && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSearchQuery('');
+                }}
+                className="w-[16px] h-[16px] bg-transparent border-none p-0 cursor-pointer flex items-center justify-center shrink-0 transition-transform duration-150 hover:scale-110 active:scale-95"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <circle cx="8" cy="8" r="6.5" fill="#7C3F20" />
+                  <line x1="5.5" y1="5.5" x2="10.5" y2="10.5" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
+                  <line x1="10.5" y1="5.5" x2="5.5" y2="10.5" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
+                </svg>
+              </button>
+            )}
             {/* Filter icon + badge - Disabled for now */}
             {/* <div
               className="relative w-[23px] h-[19.5px] cursor-pointer shrink-0"

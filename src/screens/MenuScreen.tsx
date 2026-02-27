@@ -91,6 +91,30 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
 
   const ALL_CATEGORIES = ['Pizza', 'Sushi', 'Burger', 'Dimsum', 'Pasta', 'Rice Bowl', 'Main Course (Veg)', 'Noodles', 'Fried Rice', 'Curry', 'Rice', 'Bread', 'Main Course (Non-Veg)', 'Add-on', 'Jain Food', 'Baby Food', 'Dessert', 'Breakfast', 'G Bar Nibbles', 'Veg'];
 
+  // Auto-switch filter based on search results
+  useEffect(() => {
+    if (searchQuery) {
+      const searchedDishes = dishes.filter(d =>
+        d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        d.category?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+      if (searchedDishes.length > 0) {
+        const hasVeg = searchedDishes.some(d => d.isVeg === true);
+        const hasNonVeg = searchedDishes.some(d => d.isVeg === false);
+
+        // If current filter shows no results but opposite filter has results, switch
+        if (filterType === 'VEG' && !hasVeg && hasNonVeg) {
+          setFilterType('NON-VEG');
+        } else if (filterType === 'NON-VEG' && !hasNonVeg && hasVeg) {
+          setFilterType('VEG');
+        } else if (filterType === 'ALL' && searchedDishes.length > 0) {
+          // Keep ALL if it has results
+        }
+      }
+    }
+  }, [searchQuery]);
+
   // Calculate which tabs actually have items based on the current veg/non-veg filter and search
   const CATEGORY_TABS = ALL_CATEGORIES.filter(catName => {
     const catLower = catName.toLowerCase().replace(/ /g, '');
@@ -253,17 +277,37 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
         </div>
 
         {/* Search bar */}
-        <div className="box-border w-full h-[35px] bg-brand-white border-[0.6px] border-brand-border shadow-[1px_2px_2px_rgba(255,255,255,0.3)] rounded-[50px] mb-5 flex flex-row justify-between items-center px-[14px]">
+        <div className="box-border w-full h-[35px] bg-brand-white border-[0.6px] border-brand-border shadow-[1px_2px_2px_rgba(255,255,255,0.3)] rounded-[50px] mb-5 flex flex-row justify-between items-center px-[14px] transition-all duration-200">
           <div
-            className="flex flex-row items-center gap-[10px] cursor-pointer flex-1"
+            className="flex flex-row items-center gap-[10px] cursor-pointer flex-1 transition-opacity duration-150 active:opacity-70"
             onClick={() => setIsSearchActive(true)}
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <circle cx="7" cy="7" r="5" stroke="rgba(124, 63, 32, 0.8)" strokeWidth="1.5" />
               <line x1="11" y1="11" x2="15" y2="15" stroke="rgba(124, 63, 32, 0.8)" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
-            <span className="font-roboto font-normal text-[12px] text-brand-brown opacity-60">Search items...</span>
+            {searchQuery ? (
+              <span className="font-roboto font-normal text-[12px] text-brand-brown">{searchQuery}</span>
+            ) : (
+              <span className="font-roboto font-normal text-[12px] text-brand-brown opacity-60">Search items...</span>
+            )}
           </div>
+          {searchQuery && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSearchQuery('');
+              }}
+              className="w-[16px] h-[16px] bg-transparent border-none p-0 cursor-pointer flex items-center justify-center shrink-0 transition-transform duration-150 hover:scale-110 active:scale-95"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="6.5" fill="#7C3F20" />
+                <line x1="5.5" y1="5.5" x2="10.5" y2="10.5" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
+                <line x1="10.5" y1="5.5" x2="5.5" y2="10.5" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
+            </button>
+          )}
+          {/* Filter icon + badge - Disabled for now */}
           {/* Filter icon + badge - Disabled for now */}
           {/* <div
             className="relative w-[23px] h-[19.5px] cursor-pointer shrink-0"
