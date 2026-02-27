@@ -52,7 +52,7 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
     return searchMatch;
   });
 
-  // Group items into pairs for the grid
+  // Group items into pairs for the staggered grid
   const hookahPairs: HookahItem[][] = [];
   for (let i = 0; i < filteredHookah.length; i += 2) {
     hookahPairs.push(filteredHookah.slice(i, i + 2));
@@ -206,38 +206,26 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
           </div>
         </div>
 
-        {/* Hookah grid */}
-        <div className="flex flex-col items-center gap-5 w-full">
-          {hookahPairs.map((pair, rowIdx) => (
-            <div
-              key={rowIdx}
-              className="relative w-[351px] h-[260px] mx-auto shrink-0"
-            >
-              {pair.map((hookah, colIdx) => (
-                <HookahCard
-                  key={hookah.name}
-                  hookah={hookah}
-                  colIdx={colIdx}
-                  onClick={() => setSelectedHookah(hookah)}
-                  row2={rowIdx % 2 !== 0}
-                />
-              ))}
+        {/* Hookah grid - Staggered 2-column layout per Figma */}
+        <div className="flex flex-col gap-[34px] w-full">
+          {filteredHookah.length === 0 ? (
+            <div className="text-center text-brand-muted py-10 font-inter text-[14px]">
+              No items available
             </div>
-          ))}
-
-          {/* Clear filters pill - Disabled for now */}
-          {/* {activeFilters > 0 && (
-            <div className="flex justify-center w-full mt-4">
-              <button
-                onClick={() => setActiveFilters(0)}
-                className="w-[146px] h-[33px] bg-brand-accent rounded-[80px] border-0 cursor-pointer flex justify-center items-center px-[10px]"
-              >
-                <span className="font-inter font-semibold text-[13px] leading-[16px] text-white">
-                  Clear filters
-                </span>
-              </button>
-            </div>
-          )} */}
+          ) : (
+            hookahPairs.map((pair, rowIdx) => (
+              <div key={rowIdx} className="relative w-[351px] mx-auto" style={{ minHeight: '260px' }}>
+                {pair.map((hookah, colIdx) => (
+                  <HookahCard
+                    key={hookah.name}
+                    hookah={hookah}
+                    colIdx={colIdx}
+                    onClick={() => setSelectedHookah(hookah)}
+                  />
+                ))}
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -251,35 +239,37 @@ function HookahCard({
   hookah,
   colIdx,
   onClick,
-  row2 = false,
 }: {
   hookah: HookahItem;
   colIdx: number;
   onClick: () => void;
-  row2?: boolean;
 }) {
+  const [imageLoaded, setImageLoaded] = React.useState(false);
 
   return (
     <div
       onClick={onClick}
       className="flex flex-col items-start gap-[2px] absolute w-[138px] cursor-pointer"
       style={{
-        left: colIdx === 0 ? "12px" : "200px",
-        top: colIdx === 0 ? "0px" : "14px",
+        left: colIdx === 0 ? '12px' : '200px',
+        top: colIdx === 0 ? '0px' : '14px',
       }}
     >
       {/* Image container */}
-      <div
-        className="relative shrink-0 w-full h-[123px]"
-      >
+      <div className="relative shrink-0 w-full h-[123px]">
         <div
-          className="box-border absolute w-[109px] h-[109px] top-0 border-[0.4px] border-[rgba(125,121,121,0.7)] rounded-[3px] overflow-hidden"
+          className="absolute top-0 w-[109px] h-[109px] border-[0.4px] border-[rgba(125,121,121,0.7)] rounded-[3px] overflow-hidden box-border"
           style={{ left: '13px' }}
         >
+          {!imageLoaded && (
+            <div className="w-full h-full bg-brand-cream animate-pulse" />
+          )}
           <img
             src={hookah.image}
             alt={hookah.name}
-            className="w-full h-full object-cover"
+            className={`w-full h-full object-cover block transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            onLoad={() => setImageLoaded(true)}
+            loading="eager"
           />
         </div>
       </div>

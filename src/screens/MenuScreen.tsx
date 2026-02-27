@@ -17,6 +17,8 @@ interface MenuScreenProps {
 // ── Dish card ────────────────────────────────────────────────────────────────
 function DishCard({ dish, onClick, cardWidth = 138 }: { dish: Dish; onClick: () => void; cardWidth?: number }) {
   const badgeWidth = dish.badge === "Chef's special" || dish.badge === 'Signature' ? '100px' : '125px';
+  const [imageLoaded, setImageLoaded] = React.useState(false);
+
   return (
     <div
       onClick={onClick}
@@ -30,7 +32,16 @@ function DishCard({ dish, onClick, cardWidth = 138 }: { dish: Dish; onClick: () 
           className="absolute top-0 w-[109px] h-[109px] border-[0.4px] border-[rgba(125,121,121,0.7)] rounded-[3px] overflow-hidden box-border"
           style={{ left: '13px' }}
         >
-          <img src={dish.image} alt={dish.name} className="w-full h-full object-cover block" />
+          {!imageLoaded && (
+            <div className="w-full h-full bg-brand-cream animate-pulse" />
+          )}
+          <img
+            src={dish.image}
+            alt={dish.name}
+            className={`w-full h-full object-cover block transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            onLoad={() => setImageLoaded(true)}
+            loading="eager"
+          />
         </div>
         {/* badge */}
         {dish.badge && (
@@ -333,29 +344,36 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
           </div> */}
         </div>
 
-        {/* Dish grid */}
-        <div className="flex flex-col gap-5 w-full">
+        {/* Dish grid - Staggered 2-column layout per Figma */}
+        <div className="flex flex-col gap-[34px] w-full">
           {filteredDishes.length === 0 ? (
             <div className="text-center text-brand-muted py-10 font-inter text-[14px]">
               No {filterType.toLowerCase()} items available
             </div>
           ) : (
             <>
-              {/* Row 1: first 2 dishes — staggered */}
-              {filteredDishes.slice(0, 2).length > 0 && (
-                <div className="relative w-[351px] h-[260px] mx-auto shrink-0">
-                  {filteredDishes[0] && (
+              {(() => {
+                const rows = [];
+                for (let i = 0; i < filteredDishes.length; i += 2) {
+                  const leftDish = filteredDishes[i];
+                  const rightDish = filteredDishes[i + 1];
+                  rows.push({ leftDish, rightDish, rowIndex: i / 2 });
+                }
+                return rows.map(({ leftDish, rightDish, rowIndex }) => (
+                  <div key={rowIndex} className="relative w-[351px] mx-auto" style={{ minHeight: '260px' }}>
+                    {/* Left column card */}
                     <div className="absolute" style={{ left: '12px', top: '0px' }}>
-                      <DishCard dish={filteredDishes[0]} onClick={() => setSelectedDish(filteredDishes[0])} />
+                      <DishCard dish={leftDish} onClick={() => setSelectedDish(leftDish)} />
                     </div>
-                  )}
-                  {filteredDishes[1] && (
-                    <div className="absolute" style={{ left: '200px', top: '14px' }}>
-                      <DishCard dish={filteredDishes[1]} onClick={() => setSelectedDish(filteredDishes[1])} />
-                    </div>
-                  )}
-                </div>
-              )}
+                    {/* Right column card - offset by 14px */}
+                    {rightDish && (
+                      <div className="absolute" style={{ left: '200px', top: '14px' }}>
+                        <DishCard dish={rightDish} onClick={() => setSelectedDish(rightDish)} />
+                      </div>
+                    )}
+                  </div>
+                ));
+              })()}
 
               {/* Clear filters pill */}
               {activeFilterCount > 0 && (
@@ -370,31 +388,6 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
                   </button>
                 </div>
               )}
-
-              {/* Subsequent rows: index 2 onwards — staggered 2-col */}
-              {(() => {
-                const remaining = filteredDishes.slice(2);
-                const rows = [];
-                for (let i = 0; i < remaining.length; i += 2) {
-                  rows.push(remaining.slice(i, i + 2));
-                }
-                return rows.map((rowDishes, rowIndex) => (
-                  <div key={rowIndex} className="relative w-[351px] h-[260px] mx-auto shrink-0">
-                    {rowDishes[0] && (
-                      <div className="absolute" style={{ left: '12px', top: '0px' }}>
-                        <DishCard dish={rowDishes[0]} onClick={() => setSelectedDish(rowDishes[0])} />
-                      </div>
-                    )}
-                    {rowDishes[1] && (
-                      <div className="absolute" style={{ left: '200px', top: '14px' }}>
-                        <DishCard dish={rowDishes[1]} onClick={() => setSelectedDish(rowDishes[1])} />
-                      </div>
-                    )}
-                  </div>
-                ));
-              })()}
-
-
             </>
           )}
         </div>
