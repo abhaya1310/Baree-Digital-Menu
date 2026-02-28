@@ -36,6 +36,29 @@ const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items = [
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+
+  // Load recent searches on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('recent_searches');
+    if (saved) {
+      try {
+        setRecentSearches(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to parse recent searches', e);
+      }
+    }
+  }, []);
+
+  const saveRecentSearch = (term: string) => {
+    if (!term.trim()) return;
+    setRecentSearches(prev => {
+      const filtered = prev.filter(s => s.toLowerCase() !== term.toLowerCase());
+      const updated = [term, ...filtered].slice(0, 5);
+      localStorage.setItem('recent_searches', JSON.stringify(updated));
+      return updated;
+    });
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -70,27 +93,49 @@ const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items = [
 
   const isTyping = query.length > 0;
 
-  // Generate unique suggestions from real data
+  // Generate unique suggestions from real data with fuzzy-like matching
   const getSuggestions = () => {
+    if (!isTyping) {
+      // Show recent searches if available, else popular items
+      return recentSearches.length > 0 
+        ? recentSearches 
+        : Array.from(new Set(items.map(item => item.name))).slice(0, 8);
+    }
+
+    const lowerQuery = query.toLowerCase().trim();
+    const queryWords = lowerQuery.split(/\s+/);
+
     const uniqueNames = Array.from(new Set(items.map(item => item.name)));
     const uniqueCategories = Array.from(new Set(items.map(item => item.category).filter(Boolean))) as string[];
 
     const allOptions = [...uniqueNames, ...uniqueCategories];
 
-    if (!isTyping) {
-      // Show first 8 items as "popular"
-      return allOptions.slice(0, 8);
-    }
-
-    const lowerQuery = query.toLowerCase();
     return allOptions
-      .filter(s => s.toLowerCase().includes(lowerQuery))
+      .filter(s => {
+        const lowerS = s.toLowerCase();
+        // Match all query words (fuzzy-ish)
+        return queryWords.every(word => lowerS.includes(word));
+      })
       .sort((a, b) => {
-        // Boost matches that start with the query
-        const aStart = a.toLowerCase().startsWith(lowerQuery);
-        const bStart = b.toLowerCase().startsWith(lowerQuery);
+        const lowerA = a.toLowerCase();
+        const lowerB = b.toLowerCase();
+        
+        // Exact match boost
+        if (lowerA === lowerQuery) return -1;
+        if (lowerB === lowerQuery) return 1;
+
+        // "Starts with" boost
+        const aStart = lowerA.startsWith(lowerQuery);
+        const bStart = lowerB.startsWith(lowerQuery);
         if (aStart && !bStart) return -1;
         if (!aStart && bStart) return 1;
+
+        // Word-level "starts with" boost
+        const aWordStart = lowerA.split(/\s+/).some(w => w.startsWith(lowerQuery));
+        const bWordStart = lowerB.split(/\s+/).some(w => w.startsWith(lowerQuery));
+        if (aWordStart && !bWordStart) return -1;
+        if (!aWordStart && bWordStart) return 1;
+
         return a.length - b.length;
       })
       .slice(0, 10);
@@ -99,6 +144,7 @@ const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items = [
   const suggestions = getSuggestions();
 
   const handleSelect = (term: string) => {
+    saveRecentSearch(term);
     setQuery(term);
     onSearch(term);
     onClose();
@@ -239,44 +285,88 @@ const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items = [
           </div>
 
           <div className="flex flex-col items-start gap-[15px] w-full mt-4">
-            <div className="flex flex-row items-center gap-[10px]">
-              <span className="font-playfair font-medium text-[16px] leading-[19px] text-brand-brown">
-                {isTyping ? 'Suggestions' : 'Popular searches'}
-              </span>
-              {isLoading && (
-                <div className="flex items-center gap-1">
-                  <div className="w-1 h-1 bg-brand-accent rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                  <div className="w-1 h-1 bg-brand-accent rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                  <div className="w-1 h-1 bg-brand-accent rounded-full animate-bounce"></div>
-                </div>
+            <div className="flex flex-row items-center justify-between w-full">
+              <div className="flex flex-row items-center gap-[10px]">
+                <span className="font-playfair font-medium text-[16px] leading-[19px] text-brand-brown">
+                  {isTyping ? 'Search results' : (recentSearches.length > 0 ? 'Recent searches' : 'Popular items')}
+                </span>
+                {isLoading && (
+                  <div className="flex items-center gap-1">
+                    <div className="w-1 h-1 bg-brand-accent rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                    <div className="w-1 h-1 bg-brand-accent rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                    <div className="w-1 h-1 bg-brand-accent rounded-full animate-bounce"></div>
+                  </div>
+                )}
+              </div>
+              {!isTyping && recentSearches.length > 0 && (
+                <button 
+                  onClick={() => {
+                    setRecentSearches([]);
+                    localStorage.removeItem('recent_searches');
+                  }}
+                  className="bg-transparent border-none p-0 cursor-pointer font-roboto font-normal text-[11px] text-brand-accent hover:underline"
+                >
+                  Clear all
+                </button>
               )}
             </div>
 
             {/* Suggestions list with keyboard highlight support */}
             <div ref={suggestionsRef} className="flex flex-col items-start gap-[2px] w-full" role="listbox">
-              {suggestions.map((term, idx) => (
-                <div
-                  key={idx}
-                  role="option"
-                  aria-selected={highlightedIndex === idx}
-                  onClick={() => handleSelect(term)}
-                  className={[
-                    'flex flex-row justify-between items-center w-full min-h-[44px] border-b border-[rgba(0,0,0,0.05)] cursor-pointer px-2 rounded-[4px] transition-colors duration-100',
-                    highlightedIndex === idx
-                      ? 'bg-[rgba(124,63,32,0.08)]'
-                      : 'hover:bg-[rgba(0,0,0,0.02)] active:bg-[rgba(124,63,32,0.06)]',
-                  ].join(' ')}
-                >
-                  <span className="font-playfair font-normal text-[13px] leading-[16px] text-brand-muted capitalize">
-                    {term}
-                  </span>
-                  <ArrowBold />
-                </div>
-              ))}
+              {suggestions.map((term, idx) => {
+                const isSuggestionRecent = recentSearches.includes(term);
+                return (
+                  <div
+                    key={idx}
+                    role="option"
+                    aria-selected={highlightedIndex === idx}
+                    onClick={() => handleSelect(term)}
+                    className={[
+                      'flex flex-row justify-between items-center w-full min-h-[44px] border-b border-[rgba(0,0,0,0.05)] cursor-pointer px-2 rounded-[4px] transition-all duration-150',
+                      highlightedIndex === idx
+                        ? 'bg-[rgba(124,63,32,0.12)] translate-x-1'
+                        : 'hover:bg-[rgba(124,63,32,0.04)] active:bg-[rgba(124,63,32,0.08)]',
+                    ].join(' ')}
+                  >
+                    <div className="flex items-center gap-3">
+                      {!isTyping && isSuggestionRecent ? (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-muted opacity-60">
+                          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                      ) : (
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="opacity-60">
+                          <circle cx="7" cy="7" r="4.3" stroke="currentColor" strokeWidth="1.2" />
+                          <line x1="10.3" y1="10.3" x2="14" y2="14" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                        </svg>
+                      )}
+                      <span className="font-playfair font-normal text-[14px] leading-[18px] text-brand-brown capitalize">
+                        {term}
+                      </span>
+                    </div>
+                    <ArrowBold />
+                  </div>
+                );
+              })}
               {isTyping && suggestions.length === 0 && (
-                <span className="font-roboto font-normal text-[13px] text-brand-muted italic py-2">
-                  No matches found for "{query}"
-                </span>
+                <div className="flex flex-col items-center justify-center w-full py-10 gap-3 opacity-80">
+                  <div className="w-12 h-12 rounded-full bg-brand-cream border border-brand-divider flex items-center justify-center shadow-inner">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7C3F20" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+                    </svg>
+                  </div>
+                  <div className="text-center">
+                    <p className="font-playfair font-medium text-[16px] text-brand-brown m-0">No matches found</p>
+                    <p className="font-roboto font-light text-[13px] text-brand-muted mt-1">
+                      We couldn't find anything for "{query}"
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => { setQuery(''); onSearch(''); inputRef.current?.focus(); }}
+                    className="mt-2 px-4 py-2 bg-brand-brown text-white rounded-full font-roboto text-[12px] uppercase tracking-wider active:scale-95 transition-transform"
+                  >
+                    Clear search
+                  </button>
+                </div>
               )}
             </div>
           </div>
