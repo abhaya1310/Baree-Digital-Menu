@@ -304,24 +304,19 @@ export default function DrinksScreen({
           </div>
         </div>
 
-        {/* Drink grid - Staggered 2-column layout per Figma */}
-        <div className="flex flex-col gap-[34px] w-full">
+        {/* Drink list - Full width rows */}
+        <div className="flex flex-col w-full">
           {filteredDrinks.length === 0 ? (
             <div className="text-center text-brand-muted py-10 font-inter text-[14px]">
               No drinks available
             </div>
           ) : (
-            drinkPairs.map((pair, rowIdx) => (
-              <div key={rowIdx} className="relative w-[351px] mx-auto" style={{ minHeight: '260px' }}>
-                {pair.map((drink, colIdx) => (
-                  <DrinkCard
-                    key={drink.name}
-                    drink={drink}
-                    colIdx={colIdx}
-                    onClick={() => setSelectedDrink(drink)}
-                  />
-                ))}
-              </div>
+            filteredDrinks.map((drink) => (
+              <DrinkCard
+                key={drink.name}
+                drink={drink}
+                onClick={() => setSelectedDrink(drink)}
+              />
             ))
           )}
         </div>
@@ -335,69 +330,39 @@ export default function DrinksScreen({
 // ── Shared drink card sub-component ──────────────────────────────────────────
 function DrinkCard({
   drink,
-  colIdx,
   onClick,
 }: {
   drink: Drink;
-  colIdx: number;
   onClick: () => void;
 }) {
-  const badgeWidth = drink.badge === "Chef's special" || drink.badge === 'Signature' ? '91px' : '125px';
-  const [imageLoaded, setImageLoaded] = React.useState(false);
-
   return (
     <div
       onClick={onClick}
-      className="flex flex-col items-start gap-[2px] absolute w-[138px] cursor-pointer"
-      style={{
-        left: colIdx === 0 ? '12px' : '200px',
-        top: colIdx === 0 ? '0px' : '14px',
-      }}
+      className="flex flex-col items-start gap-1 cursor-pointer w-full py-4 border-b border-brand-divider"
     >
-      {/* Image container */}
-      <div className="relative shrink-0 w-full h-[123px]">
-        <div
-          className="absolute top-0 w-[109px] h-[109px] border-[0.4px] border-[rgba(125,121,121,0.7)] rounded-[3px] overflow-hidden box-border"
-          style={{ left: '13px' }}
-        >
-          {!imageLoaded && (
-            <div className="w-full h-full bg-brand-cream animate-pulse" />
-          )}
-          <img
-            src={drink.image}
-            alt={drink.name}
-            className={`w-full h-full object-cover block transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-            onLoad={() => setImageLoaded(true)}
-            loading="eager"
-          />
-        </div>
-        {/* Badge */}
+      <div className="flex flex-row items-center gap-2">
         {drink.badge && (
-          <div
-            className="absolute left-0 top-[103px] h-[20px] bg-brand-accent rounded-[2px] flex justify-center items-center px-[3px]"
-            style={{ width: badgeWidth }}
-          >
-            <span className="font-playfair font-semibold text-[12px] leading-[14px] text-white whitespace-nowrap">
-              {drink.badge}
-            </span>
-          </div>
+          <span className="font-inter font-semibold text-[10px] uppercase tracking-wide text-brand-accent px-1.5 py-0.5 bg-brand-accent/10 rounded">
+            {drink.badge}
+          </span>
         )}
       </div>
-      {/* Text block */}
-      <div className="flex flex-col items-start gap-[3px] w-[138px]">
-        <div className="flex flex-col items-start gap-[1px] w-full">
-          <span className="font-playfair font-medium text-[17px] leading-[21px] text-brand-brown block line-clamp-2">
+      
+      <div className="flex flex-col gap-1 w-full">
+        <div className="flex justify-between items-start w-full">
+          <span className="font-playfair font-semibold text-[20px] leading-tight text-brand-brown">
             {drink.name}
           </span>
-          <div className="flex flex-row items-center gap-[20px] w-[123px] h-[15px]">
-            <span className="font-roboto font-normal text-[13px] leading-[15px] text-brand-brown">
-              ₹{drink.price}
-            </span>
-          </div>
+          <span className="font-roboto font-medium text-[16px] text-brand-brown shrink-0 ml-4">
+            ₹{drink.price}
+          </span>
         </div>
-        <p className="font-inter font-normal text-[12px] leading-[18px] tracking-[0.02em] text-brand-muted m-0 w-[127px] line-clamp-2">
-          {drink.description}
-        </p>
+
+        {drink.description && (
+          <p className="font-inter font-normal text-[13px] leading-relaxed text-brand-muted line-clamp-3 mt-1">
+            {drink.description}
+          </p>
+        )}
       </div>
     </div>
   );

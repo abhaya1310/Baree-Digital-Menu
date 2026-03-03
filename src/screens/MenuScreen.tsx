@@ -15,74 +15,51 @@ interface MenuScreenProps {
 }
 
 // ── Dish card ────────────────────────────────────────────────────────────────
-function DishCard({ dish, onClick, cardWidth = 138 }: { dish: Dish; onClick: () => void; cardWidth?: number }) {
-  const badgeWidth = dish.badge === "Chef's special" || dish.badge === 'Signature' ? '100px' : '125px';
-  const [imageLoaded, setImageLoaded] = React.useState(false);
-
+function DishCard({ dish, onClick }: { dish: Dish; onClick: () => void }) {
   return (
     <div
       onClick={onClick}
-      className="flex flex-col items-start gap-[2px] cursor-pointer"
-      style={{ width: `${cardWidth}px` }}
+      className="flex flex-col items-start gap-1 cursor-pointer w-full py-4 border-b border-brand-divider"
     >
-      {/* image container */}
-      <div className="relative shrink-0" style={{ width: `${cardWidth}px`, height: '123px' }}>
-        {/* bordered image box, left offset ~13px */}
-        <div
-          className="absolute top-0 w-[109px] h-[109px] border-[0.4px] border-[rgba(125,121,121,0.7)] rounded-[3px] overflow-hidden box-border"
-          style={{ left: '13px' }}
-        >
-          {!imageLoaded && (
-            <div className="w-full h-full bg-brand-cream animate-pulse" />
-          )}
-          <img
-            src={dish.image}
-            alt={dish.name}
-            className={`w-full h-full object-cover block transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-            onLoad={() => setImageLoaded(true)}
-            loading="eager"
-          />
+      <div className="flex flex-col gap-1 w-full">
+        <div className="flex justify-between items-start w-full">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <VegDot isVeg={!!dish.isVeg} size={15} />
+              <span className="font-playfair font-semibold text-[20px] leading-tight text-brand-brown">
+                {dish.name}
+              </span>
+            </div>
+            {dish.badge && (
+              <div className="flex">
+                <span className="font-inter font-semibold text-[10px] uppercase tracking-wide text-white px-2 py-0.5 bg-brand-accent rounded">
+                  {dish.badge}
+                </span>
+              </div>
+            )}
+          </div>
+          <span className="font-roboto font-medium text-[16px] text-brand-brown shrink-0 ml-4 pt-1">
+            ₹{dish.price}
+          </span>
         </div>
-        {/* badge */}
-        {dish.badge && (
-          <div
-            className="absolute left-0 top-[103px] h-[20px] bg-brand-accent rounded-[2px] flex justify-center items-center px-[3px]"
-            style={{ width: badgeWidth }}
-          >
-            <span className="font-playfair font-semibold text-[12px] leading-[14px] text-white">
-              {dish.badge}
-            </span>
-          </div>
-        )}
-      </div>
 
-      {/* text column */}
-      <div className="flex flex-col gap-[3px]" style={{ width: `${cardWidth}px` }}>
-        <span className="font-playfair font-medium text-[18px] leading-[22px] text-brand-brown block line-clamp-2">
-          {dish.name}
-        </span>
-        {/* price + time row */}
-        <div className="flex flex-row items-center gap-[10px]">
-          <div className="flex items-center gap-[4px]">
-            <VegDot isVeg={!!dish.isVeg} />
-            <span className="font-roboto font-normal text-[13px] leading-[15px] text-brand-brown">₹{dish.price}</span>
-          </div>
-          <div className="flex items-center gap-[3px] opacity-70">
+        {dish.description && (
+          <p className="font-inter font-normal text-[13px] leading-relaxed text-brand-muted line-clamp-3 mt-1">
+            {dish.description}
+          </p>
+        )}
+        
+        {dish.time && (
+          <div className="flex items-center gap-1 mt-1 opacity-60">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
               <circle cx="6" cy="6" r="5" stroke="#C76A3A" strokeWidth="1" />
               <line x1="6" y1="3" x2="6" y2="6.5" stroke="#C76A3A" strokeWidth="1" strokeLinecap="round" />
               <line x1="6" y1="6.5" x2="8" y2="6.5" stroke="#C76A3A" strokeWidth="1" strokeLinecap="round" />
             </svg>
-            <span className="font-roboto font-light text-[11px] leading-[17px] text-brand-accent">
+            <span className="font-roboto font-light text-[11px] text-brand-accent">
               {dish.time}
             </span>
           </div>
-        </div>
-        {/* description */}
-        {dish.description && (
-          <p className="font-inter font-normal text-[12px] leading-[18px] tracking-[0.02em] text-brand-muted m-0 line-clamp-2">
-            {dish.description}
-          </p>
         )}
       </div>
     </div>
@@ -318,66 +295,23 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
               </svg>
             </button>
           )}
-          {/* Filter icon + badge - Disabled for now */}
-          {/* Filter icon + badge - Disabled for now */}
-          {/* <div
-            className="relative w-[23px] h-[19.5px] cursor-pointer shrink-0"
-            onClick={() => setIsFilterModalOpen(true)}
-          >
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" className="absolute left-0 top-[6.5px]">
-              <line x1="1" y1="2.5" x2="12" y2="2.5" stroke="rgba(124, 63, 32, 0.8)" strokeWidth="1.1" strokeLinecap="round" />
-              <circle cx="4" cy="2.5" r="1.5" fill="rgba(124, 63, 32, 0.8)" />
-              <line x1="1" y1="6.5" x2="12" y2="6.5" stroke="rgba(124, 63, 32, 0.8)" strokeWidth="1.1" strokeLinecap="round" />
-              <circle cx="9" cy="6.5" r="1.5" fill="rgba(124, 63, 32, 0.8)" />
-              <line x1="1" y1="10.5" x2="12" y2="10.5" stroke="rgba(124, 63, 32, 0.8)" strokeWidth="1.1" strokeLinecap="round" />
-              <circle cx="6" cy="10.5" r="1.5" fill="rgba(124, 63, 32, 0.8)" />
-            </svg>
-            {activeFilterCount > 0 && (
-              <div className="absolute left-[9px] top-0 w-[14px] h-[15px]">
-                <div className="absolute left-0 top-[1px] w-[14px] h-[14px] rounded-full bg-brand-accent flex items-center justify-center">
-                  <span className="font-roboto font-normal text-[9px] leading-[10px] text-white">
-                    {activeFilterCount}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div> */}
         </div>
 
-        {/* Dish grid - Staggered 2-column layout per Figma */}
-        <div className="flex flex-col gap-[34px] w-full">
+        {/* Dish list - Full width rows */}
+        <div className="flex flex-col w-full">
           {filteredDishes.length === 0 ? (
             <div className="text-center text-brand-muted py-10 font-inter text-[14px]">
               No {filterType.toLowerCase()} items available
             </div>
           ) : (
             <>
-              {(() => {
-                const rows = [];
-                for (let i = 0; i < filteredDishes.length; i += 2) {
-                  const leftDish = filteredDishes[i];
-                  const rightDish = filteredDishes[i + 1];
-                  rows.push({ leftDish, rightDish, rowIndex: i / 2 });
-                }
-                return rows.map(({ leftDish, rightDish, rowIndex }) => (
-                  <div key={rowIndex} className="relative w-[351px] mx-auto" style={{ minHeight: '260px' }}>
-                    {/* Left column card */}
-                    <div className="absolute" style={{ left: '12px', top: '0px' }}>
-                      <DishCard dish={leftDish} onClick={() => setSelectedDish(leftDish)} />
-                    </div>
-                    {/* Right column card - offset by 14px */}
-                    {rightDish && (
-                      <div className="absolute" style={{ left: '200px', top: '14px' }}>
-                        <DishCard dish={rightDish} onClick={() => setSelectedDish(rightDish)} />
-                      </div>
-                    )}
-                  </div>
-                ));
-              })()}
+              {filteredDishes.map((dish) => (
+                <DishCard key={dish.name} dish={dish} onClick={() => setSelectedDish(dish)} />
+              ))}
 
               {/* Clear filters pill */}
               {activeFilterCount > 0 && (
-                <div className="flex justify-center">
+                <div className="flex justify-center mt-6">
                   <button
                     onClick={() => setActiveFilterCount(0)}
                     className="w-[146px] h-[33px] bg-brand-accent rounded-[80px] border-0 cursor-pointer flex justify-center items-center px-[10px]"
