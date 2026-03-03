@@ -1,4 +1,5 @@
 import { ChevronRight } from 'lucide-react';
+import VegDot from '../components/ui/VegDot';
 
 interface SpecialsScreenProps {
   onNavigateToMenu: () => void;
@@ -17,72 +18,56 @@ export default function SpecialsScreen({ onNavigateToMenu }: SpecialsScreenProps
         <div className="px-4">
 
           {/* Dish of the Day Card */}
-            <div className="bg-white text-brand-brown rounded-2xl p-4 flex items-start gap-[14px] mb-6 shadow-[0px_2.3px_2px_rgba(124,63,32,0.25)]">
+            <div className="bg-white text-brand-brown rounded-2xl p-6 mb-6 shadow-[0px_2.3px_2px_rgba(124,63,32,0.25)] border-l-4 border-brand-accent">
               <div className="flex-1">
-                <p className="font-inter font-medium text-[12px] uppercase text-brand-muted mb-[6px]">
+                <p className="font-inter font-medium text-[12px] uppercase text-brand-accent mb-[10px]">
                   DISH OF THE DAY
                 </p>
-                <h2 className="font-playfair font-semibold text-[20px] text-brand-brown inline-block mb-[6px] px-1 rounded">
-                Saffron Vegetable Pulao
-              </h2>
-              <div className="flex items-center gap-3 mb-2">
-                <span className="border border-brand-veg p-[2px] flex items-center justify-center w-4 h-4 rounded-sm">
-                  <span className="w-2 h-2 rounded-full bg-brand-veg" />
-                </span>
-                <span className="font-roboto text-[13px] text-brand-brown">₹250</span>
-                <span className="text-[12px] text-brand-accent">🕐 20 mins</span>
+                <div className="flex items-center gap-3 mb-[6px]">
+                  <VegDot isVeg={true} size={16} />
+                  <h2 className="font-playfair font-bold text-[24px] text-brand-brown m-0">
+                    Saffron Vegetable Pulao
+                  </h2>
+                </div>
+              <div className="flex items-center gap-3 mb-3">
+                <span className="font-roboto font-medium text-[15px] text-brand-brown">₹250</span>
+                <span className="text-[13px] text-brand-accent">🕐 20 mins</span>
               </div>
-                <p className="font-roboto font-normal italic text-[12px] leading-[18px] text-brand-muted m-0">
+                <p className="font-roboto font-normal italic text-[14px] leading-relaxed text-brand-muted m-0">
                   Fragrant basmati rice gently cooked with saffron, seasonal vegetables, and mild aromatic spices.
                 </p>
-            </div>
-            <div className="w-[100px] h-[100px] rounded-[12px] overflow-hidden shrink-0">
-              <img
-                src="https://images.pexels.com/photos/2456435/pexels-photo-2456435.jpeg?auto=compress&cs=tinysrgb&w=300"
-                alt="Pulao"
-                className="w-full h-full object-cover"
-              />
             </div>
           </div>
 
           {/* Section heading */}
-          <h2 className="font-playfair text-[32px] italic font-normal text-brand-brown mb-6">
+          <h2 className="font-playfair text-[32px] italic font-normal text-brand-brown mb-6 mt-8">
             Specials &amp; Offers
           </h2>
 
-          <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-6">
 
             {/* Special 1 */}
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <h3 className="font-playfair font-medium text-[22px] text-brand-brown mb-[10px]">2-for-1 Special:</h3>
-                <p className="font-inter font-normal text-[12px] leading-[18px] text-brand-muted m-0">
+            <div className="flex flex-col p-5 bg-white rounded-xl shadow-sm border-b border-brand-divider">
+                <h3 className="font-playfair font-semibold text-[22px] text-brand-brown mb-2">2-for-1 Special:</h3>
+                <p className="font-inter font-normal text-[14px] leading-relaxed text-brand-muted m-0">
                   Choose any two starters and pay for only one. The perfect way to begin your feast.
                 </p>
-              </div>
-              <img src="/food.png" alt="food" className="w-[121px] h-[125px] object-cover rounded-lg shrink-0" />
             </div>
 
             {/* Special 2 */}
-            <div className="flex items-center gap-4">
-              <img src="/drinks.png" alt="drinks" className="w-[121px] h-[125px] object-cover rounded-lg shrink-0" />
-              <div className="flex-1">
-                <h3 className="font-playfair font-medium text-[22px] text-brand-brown mb-[10px]">Buy 1, get 1 special</h3>
-                <p className="font-inter font-normal text-[12px] leading-[18px] text-brand-muted m-0">
+            <div className="flex flex-col p-5 bg-white rounded-xl shadow-sm border-b border-brand-divider">
+                <h3 className="font-playfair font-semibold text-[22px] text-brand-brown mb-2">Buy 1, get 1 special</h3>
+                <p className="font-inter font-normal text-[14px] leading-relaxed text-brand-muted m-0">
                   Buy a cocktail of above ₹250, and get another cocktail for absolutely free.
                 </p>
-              </div>
             </div>
 
             {/* Special 3 */}
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                <h3 className="font-playfair font-medium text-[22px] text-brand-brown mb-[10px]">2-for-1 Special:</h3>
-                <p className="font-inter font-normal text-[12px] leading-[18px] text-brand-muted m-0">
+            <div className="flex flex-col p-5 bg-white rounded-xl shadow-sm border-b border-brand-divider">
+                <h3 className="font-playfair font-semibold text-[22px] text-brand-brown mb-2">2-for-1 Special:</h3>
+                <p className="font-inter font-normal text-[14px] leading-relaxed text-brand-muted m-0">
                   Choose any two starters and pay for only one. The perfect way to begin your feast.
                 </p>
-              </div>
-              <img src="/cake.png" alt="cake" className="w-[121px] h-[125px] object-cover rounded-lg shrink-0" />
             </div>
 
           </div>

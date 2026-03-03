@@ -206,24 +206,19 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
           </div>
         </div>
 
-        {/* Hookah grid - Staggered 2-column layout per Figma */}
-        <div className="flex flex-col gap-[34px] w-full">
+        {/* Hookah list - Full width rows */}
+        <div className="flex flex-col w-full">
           {filteredHookah.length === 0 ? (
             <div className="text-center text-brand-muted py-10 font-inter text-[14px]">
               No items available
             </div>
           ) : (
-            hookahPairs.map((pair, rowIdx) => (
-              <div key={rowIdx} className="relative w-[351px] mx-auto" style={{ minHeight: '260px' }}>
-                {pair.map((hookah, colIdx) => (
-                  <HookahCard
-                    key={hookah.name}
-                    hookah={hookah}
-                    colIdx={colIdx}
-                    onClick={() => setSelectedHookah(hookah)}
-                  />
-                ))}
-              </div>
+            filteredHookah.map((hookah) => (
+              <HookahCard
+                key={hookah.name}
+                hookah={hookah}
+                onClick={() => setSelectedHookah(hookah)}
+              />
             ))
           )}
         </div>
@@ -237,56 +232,28 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
 // ── Shared hookah card sub-component ──────────────────────────────────────────
 function HookahCard({
   hookah,
-  colIdx,
   onClick,
 }: {
   hookah: HookahItem;
-  colIdx: number;
   onClick: () => void;
 }) {
-  const [imageLoaded, setImageLoaded] = React.useState(false);
-
   return (
     <div
       onClick={onClick}
-      className="flex flex-col items-start gap-[2px] absolute w-[138px] cursor-pointer"
-      style={{
-        left: colIdx === 0 ? '12px' : '200px',
-        top: colIdx === 0 ? '0px' : '14px',
-      }}
+      className="flex flex-col items-start gap-1 cursor-pointer w-full py-4 border-b border-brand-divider"
     >
-      {/* Image container */}
-      <div className="relative shrink-0 w-full h-[123px]">
-        <div
-          className="absolute top-0 w-[109px] h-[109px] border-[0.4px] border-[rgba(125,121,121,0.7)] rounded-[3px] overflow-hidden box-border"
-          style={{ left: '13px' }}
-        >
-          {!imageLoaded && (
-            <div className="w-full h-full bg-brand-cream animate-pulse" />
-          )}
-          <img
-            src={hookah.image}
-            alt={hookah.name}
-            className={`w-full h-full object-cover block transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-            onLoad={() => setImageLoaded(true)}
-            loading="eager"
-          />
-        </div>
-      </div>
-      {/* Text block */}
-      <div className="flex flex-col items-start gap-[3px] w-[138px]">
-        <div className="flex flex-col items-start gap-[1px] w-full">
-          <span className="font-playfair font-medium text-[17px] leading-[21px] text-brand-brown block line-clamp-2">
+      <div className="flex flex-col gap-1 w-full">
+        <div className="flex justify-between items-start w-full">
+          <span className="font-playfair font-semibold text-[20px] leading-tight text-brand-brown">
             {hookah.name}
           </span>
-          <div className="flex flex-row items-center gap-[20px] w-[123px] h-[15px]">
-            <span className="font-roboto font-normal text-[13px] leading-[15px] text-brand-brown">
-              ₹{hookah.price}
-            </span>
-          </div>
+          <span className="font-roboto font-medium text-[16px] text-brand-brown shrink-0 ml-4">
+            ₹{hookah.price}
+          </span>
         </div>
+
         {hookah.description && (
-          <p className="font-inter font-normal text-[12px] leading-[18px] tracking-[0.02em] text-brand-muted m-0 w-[127px] line-clamp-2">
+          <p className="font-inter font-normal text-[13px] leading-relaxed text-brand-muted line-clamp-3 mt-1">
             {hookah.description}
           </p>
         )}
