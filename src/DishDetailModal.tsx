@@ -48,9 +48,7 @@ const DishDetailModal = ({ isOpen, onClose, dish, type = 'food' }: DishDetailMod
 
   if (!isOpen) return null;
 
-  const description =
-    dish.description ||
-    'Traditional melt-in-mouth kebab made with finely minced meat, marinated in a secret blend of spices, and slow-cooked to perfection.';
+  const description = dish.description || '';
 
   return (
     <>
@@ -76,8 +74,20 @@ const DishDetailModal = ({ isOpen, onClose, dish, type = 'food' }: DishDetailMod
           </button>
         </div>
 
+        {/* ── Item image ── */}
+        {dish.image && (
+          <div className="w-full px-[23px] mt-4">
+            <img
+              src={dish.image}
+              alt={dish.name}
+              className="w-full h-[160px] object-cover rounded-[12px]"
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+            />
+          </div>
+        )}
+
         {/* ── Name + price/time block ── */}
-        <div className="flex flex-col items-start gap-4 w-full mt-8 ml-[23px] pr-[23px]">
+        <div className="flex flex-col items-start gap-4 w-full mt-4 ml-[23px] pr-[23px]">
 
           {/* Name + veg dot (veg dot hidden for drinks) */}
           <div className="flex items-center gap-3 w-full">
@@ -109,28 +119,30 @@ const DishDetailModal = ({ isOpen, onClose, dish, type = 'food' }: DishDetailMod
         {/* ── Scrollable content sections ── */}
         <div className="flex flex-col items-start gap-[35px] w-[213px] mt-[35px] mb-[40px] ml-[23px]">
 
-          {/* Description */}
-          <div className="flex flex-col items-start gap-[12px] w-[213px]">
-            <SectionHeading
-              label="Description"
-              icon={
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                  <path d="M4 4.5C4 3.4 4.9 2.5 6 2.5H17V17.5H6C4.9 17.5 4 18.4 4 19.5V4.5Z" stroke="#7C3F20" strokeWidth="1.3" />
-                  <path d="M4 19.5C4 18.4 4.9 17.5 6 17.5H17" stroke="#7C3F20" strokeWidth="1.3" />
-                  <line x1="7.5" y1="7" x2="14" y2="7" stroke="#7C3F20" strokeWidth="1.1" strokeLinecap="round" />
-                  <line x1="7.5" y1="10" x2="14" y2="10" stroke="#7C3F20" strokeWidth="1.1" strokeLinecap="round" />
-                </svg>
-              }
-            />
-            <p
-              className={[
-                'font-normal text-[12px] leading-[18px] text-justify text-brand-muted m-0 w-[213px]',
-                isDrink ? 'font-roboto' : 'font-inter',
-              ].join(' ')}
-            >
-              {description}
-            </p>
-          </div>
+          {/* Description — only show if non-empty */}
+          {description && (
+            <div className="flex flex-col items-start gap-[12px] w-[213px]">
+              <SectionHeading
+                label="Description"
+                icon={
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                    <path d="M4 4.5C4 3.4 4.9 2.5 6 2.5H17V17.5H6C4.9 17.5 4 18.4 4 19.5V4.5Z" stroke="#7C3F20" strokeWidth="1.3" />
+                    <path d="M4 19.5C4 18.4 4.9 17.5 6 17.5H17" stroke="#7C3F20" strokeWidth="1.3" />
+                    <line x1="7.5" y1="7" x2="14" y2="7" stroke="#7C3F20" strokeWidth="1.1" strokeLinecap="round" />
+                    <line x1="7.5" y1="10" x2="14" y2="10" stroke="#7C3F20" strokeWidth="1.1" strokeLinecap="round" />
+                  </svg>
+                }
+              />
+              <p
+                className={[
+                  'font-normal text-[12px] leading-[18px] text-justify text-brand-muted m-0 w-[213px]',
+                  isDrink ? 'font-roboto' : 'font-inter',
+                ].join(' ')}
+              >
+                {description}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </>

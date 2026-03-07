@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { drinkCategories, foodCategories, hookahCategories } from './data/categories';
 import { 
   Pizza, Fish, Sandwich, Cookie, Coffee, Utensils, Wheat, 
   Wine, Beer, GlassWater, Flame, Wind, 
@@ -11,7 +10,6 @@ interface MenuCategoriesModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCategorySelect?: (category: string) => void;
-  type?: 'food' | 'drinks' | 'tobacco';
   availableCategories?: string[];
 }
 
@@ -29,14 +27,14 @@ const getCategoryIcon = (categoryName: string) => {
   if (name.includes('bread') || name.includes('nibbles')) return <Wheat size={18} className="text-[#6D4C41]" />;
   if (name.includes('starter') || name.includes('dimsum')) return <Cookie size={18} className="text-[#6D4C41]" />;
   if (name.includes('breakfast')) return <Coffee size={18} className="text-[#6D4C41]" />;
-  if (name.includes('main')) return <Beef size={18} className="text-[#6D4C41]" />;
+  if (name.includes('main') || name.includes('course')) return <Beef size={18} className="text-[#6D4C41]" />;
   if (name.includes('veg')) return <Cherry size={18} className="text-[#6D4C41]" />;
 
   // Drinks
   if (name.includes('beer')) return <Beer size={18} className="text-[#6D4C41]" />;
   if (name.includes('wine')) return <Wine size={18} className="text-[#6D4C41]" />;
   if (name.includes('cocktail') || name.includes('mocktail')) return <Wine size={18} className="text-[#6D4C41]" />;
-  if (name.includes('drink') || name.includes('shake')) return <CupSoda size={18} className="text-[#6D4C41]" />;
+  if (name.includes('drink') || name.includes('shake') || name.includes('juice')) return <CupSoda size={18} className="text-[#6D4C41]" />;
   if (name.includes('whiskey') || name.includes('liquor') || name.includes('rum') || name.includes('vodka') || name.includes('gin') || name.includes('tequila')) return <GlassWater size={18} className="text-[#6D4C41]" />;
   
   // Tobacco
@@ -48,14 +46,7 @@ const getCategoryIcon = (categoryName: string) => {
   return <Utensils size={18} className="text-[#6D4C41]" />;
 };
 
-export default function MenuCategoriesModal({ isOpen, onClose, onCategorySelect, type = 'food', availableCategories }: MenuCategoriesModalProps) {
-  const allCategories = type === 'food' ? foodCategories : type === 'drinks' ? drinkCategories : hookahCategories;
-  const displayCategories = availableCategories 
-    ? allCategories.filter(cat => availableCategories.some(ac => ac.toLowerCase().replace(/ /g, '') === cat.name.toLowerCase().replace(/ /g, '')))
-    : allCategories;
-    
-  const title = type === 'food' ? 'Our menu' : type === 'drinks' ? 'Drinks menu' : 'Tobacco menu';
-
+export default function MenuCategoriesModal({ isOpen, onClose, onCategorySelect, availableCategories = [] }: MenuCategoriesModalProps) {
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : 'unset';
     return () => { document.body.style.overflow = 'unset'; };
@@ -68,30 +59,30 @@ export default function MenuCategoriesModal({ isOpen, onClose, onCategorySelect,
       className="fixed inset-0 z-[60] flex items-end justify-center bg-[rgba(22,43,57,0.7)]"
       onClick={onClose}
     >
-      {/* Bottom sheet — pure white background, rounded top corners */}
+      {/* Bottom sheet */}
       <div
         className="w-[393px] max-h-[80vh] bg-white rounded-t-[40px] flex flex-col items-center relative pb-[30px]"
         onClick={e => e.stopPropagation()}
       >
         {/* Title */}
         <h2 className="font-playfair font-semibold text-[32px] leading-[40px] text-black mt-[45px] mb-[35px] text-center w-full">
-          {title}
+          Our menu
         </h2>
 
         {/* Scrollable Categories List - 2 Columns */}
         <div className="w-full px-[40px] overflow-y-auto [scrollbar-width:none]">
           <div className="grid grid-cols-2 gap-y-[35px] gap-x-[10px]">
-            {displayCategories.map(cat => (
+            {availableCategories.map(catName => (
               <div
-                key={cat.name}
-                onClick={() => onCategorySelect?.(cat.name)}
+                key={catName}
+                onClick={() => onCategorySelect?.(catName)}
                 className="flex flex-row items-center gap-[12px] cursor-pointer hover:opacity-80 transition-opacity"
               >
                 <div className="flex items-center justify-center w-[20px] h-[20px]">
-                  {getCategoryIcon(cat.name)}
+                  {getCategoryIcon(catName)}
                 </div>
                 <span className="font-playfair font-medium text-[20px] leading-[24px] text-[#4A4A4A]">
-                  {cat.name}
+                  {catName}
                 </span>
               </div>
             ))}
