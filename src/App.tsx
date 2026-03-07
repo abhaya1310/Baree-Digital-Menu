@@ -1,49 +1,13 @@
-import React, { useState, useEffect } from "react";
-import MenuScreen from "./screens/MenuScreen";
-import SpecialsScreen from "./screens/SpecialsScreen";
-import DrinksScreen from "./screens/DrinksScreen";
-import TobaccoScreen from "./screens/TobaccoScreen";
+import { Routes, Route, Navigate } from 'react-router-dom';
+import MenuPage from './screens/MenuPage';
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState<
-    "specials" | "menu" | "drinks" | "tobacco"
-  >("menu");
-
-  // Reset scroll position when screen changes
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [currentScreen]);
-
   return (
-    <>
-      {currentScreen === "specials" ? (
-        <SpecialsScreen
-          key="specials"
-          onNavigateToMenu={() => setCurrentScreen("menu")}
-        />
-      ) : currentScreen === "menu" ? (
-        <MenuScreen
-          key="menu"
-          onNavigateToSpecials={() => setCurrentScreen("specials")}
-          onNavigateToDrinks={() => setCurrentScreen("drinks")}
-          onNavigateToTobacco={() => setCurrentScreen("tobacco")}
-        />
-      ) : currentScreen === "drinks" ? (
-        <DrinksScreen
-          key="drinks"
-          onNavigateToSpecials={() => setCurrentScreen("specials")}
-          onNavigateToFood={() => setCurrentScreen("menu")}
-          onNavigateToTobacco={() => setCurrentScreen("tobacco")}
-        />
-      ) : (
-        <TobaccoScreen
-          key="tobacco"
-          onNavigateToSpecials={() => setCurrentScreen("specials")}
-          onNavigateToFood={() => setCurrentScreen("menu")}
-          onNavigateToDrinks={() => setCurrentScreen("drinks")}
-        />
-      )}
-    </>
+    <Routes>
+      <Route path="/menu/:qrSlug" element={<MenuPage />} />
+      {/* Redirect root to a placeholder — in production the QR code provides the slug */}
+      <Route path="*" element={<Navigate to="/menu/demo" replace />} />
+    </Routes>
   );
 }
 
