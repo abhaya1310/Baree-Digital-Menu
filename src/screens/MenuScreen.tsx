@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import DishDetailModal from '../DishDetailModal';
 import MenuCategoriesModal from '../MenuCategoriesModal';
 import FilterModal from '../FilterModal';
@@ -10,10 +10,19 @@ import MenuFab from '../components/ui/MenuFab';
 import VegDot from '../components/ui/VegDot';
 
 interface MenuScreenProps {
-  onNavigateToSpecials: () => void;
-  onNavigateToDrinks: () => void;
-  onNavigateToTobacco: () => void;
+  onNavigateToSpecials?: () => void;
+  activeGroup: string | null;
+  onGroupChange: (group: string | null) => void;
+  uniqueGroups: string[];
 }
+
+const GROUP_IMAGES: Record<string, string> = {
+  Food: 'https://images.pexels.com/photos/1639562/pexels-photo-1639562.jpeg?auto=compress&cs=tinysrgb&w=200',
+  Drinks: 'https://images.pexels.com/photos/338713/pexels-photo-338713.jpeg?auto=compress&cs=tinysrgb&w=200',
+  Tobacco: 'https://images.pexels.com/photos/4969832/pexels-photo-4969832.jpeg?auto=compress&cs=tinysrgb&w=200',
+  Desserts: 'https://images.pexels.com/photos/291528/pexels-photo-291528.jpeg?auto=compress&cs=tinysrgb&w=200',
+};
+const DEFAULT_GROUP_IMAGE = 'https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?auto=compress&cs=tinysrgb&w=200';
 
 // ── Dish card (text-only, no images — Template 4's defining feature) ─────────
 function DishCard({ dish, onClick }: { dish: ApiMenuItem; onClick: () => void }) {
@@ -74,7 +83,7 @@ function DishCard({ dish, onClick }: { dish: ApiMenuItem; onClick: () => void })
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
-export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, onNavigateToTobacco }: MenuScreenProps) {
+export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupChange, uniqueGroups }: MenuScreenProps) {
   const { menu, categories, allItems } = useMenu();
 
   const [activeTab, setActiveTab] = useState('');
@@ -86,12 +95,35 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Set initial active tab from first category
+  const showGroupCards = uniqueGroups.length > 1;
+  const showLargerLogo = uniqueGroups.length <= 1;
+
+  // Initialize activeGroup to first group if not set
   useEffect(() => {
-    if (categories.length > 0 && !activeTab) {
-      setActiveTab(categories[0].name.toLowerCase().replace(/ /g, ''));
+    if (activeGroup === null && uniqueGroups.length > 0) {
+      onGroupChange(uniqueGroups[0]);
     }
-  }, [categories]);
+  }, [activeGroup, uniqueGroups, onGroupChange]);
+
+  // Filter categories by active group
+  const groupFilteredCategories = useMemo(() => {
+    if (!activeGroup) return categories;
+    return categories.filter(cat => (cat.group || 'Food') === activeGroup);
+  }, [categories, activeGroup]);
+
+  // Set initial active tab from first category in filtered group
+  useEffect(() => {
+    if (groupFilteredCategories.length > 0 && !activeTab) {
+      setActiveTab(groupFilteredCategories[0].name.toLowerCase().replace(/ /g, ''));
+    }
+  }, [groupFilteredCategories]);
+
+  // When group changes, reset active tab to first visible category
+  useEffect(() => {
+    if (groupFilteredCategories.length > 0) {
+      setActiveTab(groupFilteredCategories[0].name.toLowerCase().replace(/ /g, ''));
+    }
+  }, [activeGroup]);
 
   const logoUrl = menu?.outlet?.brand?.logo;
 
@@ -117,11 +149,10 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
   }, [searchQuery]);
 
   // Calculate which tabs actually have items based on the current veg/non-veg filter and search
-  const CATEGORY_TABS = categories
+  const CATEGORY_TABS = groupFilteredCategories
     .map(cat => cat.name)
     .filter(catName => {
-      const catLower = catName.toLowerCase().replace(/ /g, '');
-      const catItems = categories.find(c => c.name === catName)?.items ?? [];
+      const catItems = groupFilteredCategories.find(c => c.name === catName)?.items ?? [];
       return catItems.some(d => {
         const searchMatch = !searchQuery ||
           d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -143,7 +174,7 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
   }, [CATEGORY_TABS, activeTab]);
 
   // Get items for the active category
-  const activeCategory = categories.find(
+  const activeCategory = groupFilteredCategories.find(
     c => c.name.toLowerCase().replace(/ /g, '') === activeTab
   );
   const filteredDishes = (activeCategory?.items ?? []).filter((d) => {
@@ -157,7 +188,7 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
     return true;
   });
 
-  // Build search items for SearchOverlay
+  // Build search items for SearchOverlay — use allItems (across all groups)
   const searchItems = allItems.map(item => ({ name: item.name, category: activeCategory?.name }));
 
   return (
@@ -196,30 +227,26 @@ export default function MenuScreen({ onNavigateToSpecials, onNavigateToDrinks, o
         {/* Logo */}
         <div className="flex justify-center pt-[30px] pb-[10px]">
           {logoUrl ? (
-            <img src={logoUrl} alt="Logo" className="w-[100px] h-[35px] object-contain" />
+            <img src={logoUrl} alt="Logo" className={showLargerLogo ? 'w-[140px] h-[50px] object-contain' : 'w-[100px] h-[35px] object-contain'} />
           ) : (
-            <img src="/logo.png" alt="Logo" className="w-[100px] h-[35px] object-contain" />
+            <img src="/logo.png" alt="Logo" className={showLargerLogo ? 'w-[140px] h-[50px] object-contain' : 'w-[100px] h-[35px] object-contain'} />
           )}
         </div>
 
-        {/* Category cards row */}
-        <div className="flex flex-row items-center gap-[25px] w-[290px] h-[100px] mx-auto mb-5">
-          <CategoryCard
-            label="Food"
-            img="https://images.pexels.com/photos/1639562/pexels-photo-1639562.jpeg?auto=compress&cs=tinysrgb&w=200"
-            active
-          />
-          <CategoryCard
-            label="Drinks"
-            img="https://images.pexels.com/photos/338713/pexels-photo-338713.jpeg?auto=compress&cs=tinysrgb&w=200"
-            onClick={onNavigateToDrinks}
-          />
-          <CategoryCard
-            label="Tobacco"
-            img="https://images.pexels.com/photos/4969832/pexels-photo-4969832.jpeg?auto=compress&cs=tinysrgb&w=200"
-            onClick={onNavigateToTobacco}
-          />
-        </div>
+        {/* Dynamic group cards row */}
+        {showGroupCards && (
+          <div className="flex flex-row items-center gap-[25px] justify-center h-[100px] mx-auto mb-5">
+            {uniqueGroups.map((group) => (
+              <CategoryCard
+                key={group}
+                label={group}
+                img={GROUP_IMAGES[group] || DEFAULT_GROUP_IMAGE}
+                active={activeGroup === group}
+                onClick={() => onGroupChange(group)}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Veg / All / Non-veg pill bar */}
         <div className="w-full h-[36px] rounded-[50px] border-[0.6px] border-brand-border shadow-[0px_2.3px_2px_rgba(124,63,32,0.25)] p-[3px] bg-brand-white box-border flex items-center mx-auto mb-4">

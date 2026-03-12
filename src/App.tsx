@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { MenuProvider, useMenu } from "./context/MenuContext";
 import MenuScreen from "./screens/MenuScreen";
 import SpecialsScreen from "./screens/SpecialsScreen";
-import DrinksScreen from "./screens/DrinksScreen";
-import TobaccoScreen from "./screens/TobaccoScreen";
 
 // ── Loading screen (matches Template 4 cream/brown theme) ────────────────────
 function LoadingScreen() {
@@ -63,10 +61,19 @@ function MenuLoadingScreen() {
 
 // ── Inner app with screen navigation ─────────────────────────────────────────
 function AppContent() {
-  const { menu, loading, errorCode, errorMessage, refetch } = useMenu();
-  const [currentScreen, setCurrentScreen] = useState<
-    "specials" | "menu" | "drinks" | "tobacco"
-  >("menu");
+  const { menu, loading, errorCode, errorMessage, refetch, categories, allItems } = useMenu();
+
+  const uniqueGroups = useMemo(() => [...new Set(categories.map(c => c.group || 'Food'))], [categories]);
+  const hasRecommended = useMemo(() => allItems.some(i => i.recommended), [allItems]);
+
+  const [currentScreen, setCurrentScreen] = useState<"specials" | "menu">("menu");
+  const [activeGroup, setActiveGroup] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (menu && !hasRecommended && currentScreen === 'specials') {
+      setCurrentScreen('menu');
+    }
+  }, [menu, hasRecommended, currentScreen]);
 
   // Reset scroll position when screen changes
   useEffect(() => {
@@ -80,31 +87,18 @@ function AppContent() {
 
   return (
     <>
-      {currentScreen === "specials" ? (
+      {currentScreen === "specials" && hasRecommended ? (
         <SpecialsScreen
           key="specials"
           onNavigateToMenu={() => setCurrentScreen("menu")}
         />
-      ) : currentScreen === "menu" ? (
+      ) : (
         <MenuScreen
           key="menu"
-          onNavigateToSpecials={() => setCurrentScreen("specials")}
-          onNavigateToDrinks={() => setCurrentScreen("drinks")}
-          onNavigateToTobacco={() => setCurrentScreen("tobacco")}
-        />
-      ) : currentScreen === "drinks" ? (
-        <DrinksScreen
-          key="drinks"
-          onNavigateToSpecials={() => setCurrentScreen("specials")}
-          onNavigateToFood={() => setCurrentScreen("menu")}
-          onNavigateToTobacco={() => setCurrentScreen("tobacco")}
-        />
-      ) : (
-        <TobaccoScreen
-          key="tobacco"
-          onNavigateToSpecials={() => setCurrentScreen("specials")}
-          onNavigateToFood={() => setCurrentScreen("menu")}
-          onNavigateToDrinks={() => setCurrentScreen("drinks")}
+          onNavigateToSpecials={hasRecommended ? () => setCurrentScreen("specials") : undefined}
+          activeGroup={activeGroup}
+          onGroupChange={setActiveGroup}
+          uniqueGroups={uniqueGroups}
         />
       )}
     </>
