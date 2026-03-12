@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useMenu } from './context/MenuContext';
 
 interface SearchItem {
   name: string;
@@ -29,13 +30,21 @@ function ArrowBold() {
   );
 }
 
-const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items = [] }: SearchOverlayProps) => {
+const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items: propItems }: SearchOverlayProps) => {
+  const { allItems, menu } = useMenu();
+  // Use allItems from context if propItems not provided or empty
+  const items: SearchItem[] = (propItems && propItems.length > 0)
+    ? propItems.map(item => ({ name: item.name, category: (item as any).category }))
+    : allItems.map(item => ({ name: item.name }));
+
   const [query, setQuery] = useState(initialQuery);
   const [isLoading, setIsLoading] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const logoUrl = menu?.outlet?.brand?.logo;
 
   useEffect(() => {
     if (isOpen) {
@@ -161,7 +170,11 @@ const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items = [
       >
         {/* Logo */}
         <div className="flex justify-center w-full mb-[15px]">
-          <img src="/logo.png" alt="CSAT" className="w-[100px] h-[35px] object-contain" />
+          {logoUrl ? (
+            <img src={logoUrl} alt="Logo" className="w-[100px] h-[35px] object-contain" />
+          ) : (
+            <img src="/logo.png" alt="Logo" className="w-[100px] h-[35px] object-contain" />
+          )}
         </div>
 
         <div className="flex flex-col items-start gap-[10px] w-full">
@@ -207,7 +220,7 @@ const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items = [
                     }, 500);
                   }}
                   onKeyDown={handleKeyDown}
-                  placeholder="Search drinks, brands, flavors..."
+                  placeholder="Search items..."
                   className="bg-transparent border-none outline-none font-roboto font-normal text-[12px] leading-[14px] text-brand-muted w-full caret-brand-brown appearance-none [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
                 />
               </div>

@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import { drinkCategories, foodCategories, hookahCategories } from './data/categories';
-import { 
-  Pizza, Fish, Sandwich, Cookie, Coffee, Utensils, Wheat, 
-  Wine, Beer, GlassWater, Flame, Wind, 
+import { useMenu } from './context/MenuContext';
+import {
+  Pizza, Fish, Sandwich, Cookie, Coffee, Utensils, Wheat,
+  Wine, Beer, GlassWater, Flame, Wind,
   Soup, Star, Beef, UtensilsCrossed, Cherry,
   Waves, PartyPopper, CakeSlice, CupSoda
 } from 'lucide-react';
@@ -18,7 +18,7 @@ interface MenuCategoriesModalProps {
 // Icon mapping helper
 const getCategoryIcon = (categoryName: string) => {
   const name = categoryName.toLowerCase();
-  
+
   // Food
   if (name.includes('pizza')) return <Pizza size={18} className="text-[#6D4C41]" />;
   if (name.includes('sushi') || name.includes('fish')) return <Fish size={18} className="text-[#6D4C41]" />;
@@ -38,7 +38,7 @@ const getCategoryIcon = (categoryName: string) => {
   if (name.includes('cocktail') || name.includes('mocktail')) return <Wine size={18} className="text-[#6D4C41]" />;
   if (name.includes('drink') || name.includes('shake')) return <CupSoda size={18} className="text-[#6D4C41]" />;
   if (name.includes('whiskey') || name.includes('liquor') || name.includes('rum') || name.includes('vodka') || name.includes('gin') || name.includes('tequila')) return <GlassWater size={18} className="text-[#6D4C41]" />;
-  
+
   // Tobacco
   if (name.includes('classic')) return <Flame size={18} className="text-[#6D4C41]" />;
   if (name.includes('mix')) return <Wind size={18} className="text-[#6D4C41]" />;
@@ -49,11 +49,13 @@ const getCategoryIcon = (categoryName: string) => {
 };
 
 export default function MenuCategoriesModal({ isOpen, onClose, onCategorySelect, type = 'food', availableCategories }: MenuCategoriesModalProps) {
-  const allCategories = type === 'food' ? foodCategories : type === 'drinks' ? drinkCategories : hookahCategories;
-  const displayCategories = availableCategories 
-    ? allCategories.filter(cat => availableCategories.some(ac => ac.toLowerCase().replace(/ /g, '') === cat.name.toLowerCase().replace(/ /g, '')))
-    : allCategories;
-    
+  const { categories } = useMenu();
+
+  // Use API categories for food, fall back to availableCategories for drinks/tobacco
+  const displayCategories = availableCategories
+    ? availableCategories.map(name => ({ name }))
+    : categories.map(cat => ({ name: cat.name }));
+
   const title = type === 'food' ? 'Our menu' : type === 'drinks' ? 'Drinks menu' : 'Tobacco menu';
 
   useEffect(() => {
@@ -110,7 +112,7 @@ export default function MenuCategoriesModal({ isOpen, onClose, onCategorySelect,
             </svg>
           </button>
         </div>
-        
+
       </div>
     </div>
   );
