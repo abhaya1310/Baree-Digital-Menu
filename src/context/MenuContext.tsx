@@ -56,7 +56,8 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
 
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fetchMenu = useCallback(async () => {
+  // silent=true: don't show loading spinner or clear current error state (used for retries + background refresh)
+  const fetchMenu = useCallback(async (silent = false) => {
     if (!brandSlug || !outletSlug || !accessPointSlug) {
       setErrorCode('MENU_NOT_FOUND');
       setErrorMessage('No menu identifier provided. Please scan a valid QR code.');
@@ -64,13 +65,17 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    try {
+    if (!silent) {
       setLoading(true);
       setErrorCode(null);
       setErrorMessage(null);
+    }
 
+    try {
       const data = await fetchMenuBySlug(brandSlug, outletSlug, accessPointSlug);
       setMenu(data);
+      setErrorCode(null);
+      setErrorMessage(null);
 
       // Set document title to brand name
       if (data.outlet?.brand?.name) {
@@ -96,7 +101,7 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
 
         if (err.code === 'MENU_LOADING') {
           retryTimerRef.current = setTimeout(() => {
-            fetchMenu();
+            fetchMenu(true); // silent retry — keeps "Preparing your menu" screen stable
           }, LOADING_RETRY_MS);
         }
       } else {
@@ -104,14 +109,14 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
         setErrorMessage('An unexpected error occurred. Please try again.');
       }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [brandSlug, outletSlug, accessPointSlug]);
 
   useEffect(() => {
     fetchMenu();
 
-    const interval = setInterval(fetchMenu, REFRESH_INTERVAL_MS);
+    const interval = setInterval(() => fetchMenu(true), REFRESH_INTERVAL_MS);
 
     return () => {
       clearInterval(interval);

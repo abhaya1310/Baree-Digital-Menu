@@ -1,11 +1,5 @@
 import { useEffect } from 'react';
 import { useMenu } from './context/MenuContext';
-import {
-  Pizza, Fish, Sandwich, Cookie, Coffee, Utensils, Wheat,
-  Wine, Beer, GlassWater, Flame, Wind,
-  Soup, Star, Beef, UtensilsCrossed, Cherry,
-  Waves, PartyPopper, CakeSlice, CupSoda
-} from 'lucide-react';
 
 interface MenuCategoriesModalProps {
   isOpen: boolean;
@@ -14,39 +8,6 @@ interface MenuCategoriesModalProps {
   type?: 'food' | 'drinks' | 'tobacco';
   availableCategories?: string[];
 }
-
-// Icon mapping helper
-const getCategoryIcon = (categoryName: string) => {
-  const name = categoryName.toLowerCase();
-
-  // Food
-  if (name.includes('pizza')) return <Pizza size={18} className="text-[#6D4C41]" />;
-  if (name.includes('sushi') || name.includes('fish')) return <Fish size={18} className="text-[#6D4C41]" />;
-  if (name.includes('burger') || name.includes('sandwich')) return <Sandwich size={18} className="text-[#6D4C41]" />;
-  if (name.includes('dessert') || name.includes('sweet')) return <CakeSlice size={18} className="text-[#6D4C41]" />;
-  if (name.includes('pasta') || name.includes('noodle')) return <UtensilsCrossed size={18} className="text-[#6D4C41]" />;
-  if (name.includes('rice') || name.includes('bowl')) return <Soup size={18} className="text-[#6D4C41]" />;
-  if (name.includes('bread') || name.includes('nibbles')) return <Wheat size={18} className="text-[#6D4C41]" />;
-  if (name.includes('starter') || name.includes('dimsum')) return <Cookie size={18} className="text-[#6D4C41]" />;
-  if (name.includes('breakfast')) return <Coffee size={18} className="text-[#6D4C41]" />;
-  if (name.includes('main')) return <Beef size={18} className="text-[#6D4C41]" />;
-  if (name.includes('veg')) return <Cherry size={18} className="text-[#6D4C41]" />;
-
-  // Drinks
-  if (name.includes('beer')) return <Beer size={18} className="text-[#6D4C41]" />;
-  if (name.includes('wine')) return <Wine size={18} className="text-[#6D4C41]" />;
-  if (name.includes('cocktail') || name.includes('mocktail')) return <Wine size={18} className="text-[#6D4C41]" />;
-  if (name.includes('drink') || name.includes('shake')) return <CupSoda size={18} className="text-[#6D4C41]" />;
-  if (name.includes('whiskey') || name.includes('liquor') || name.includes('rum') || name.includes('vodka') || name.includes('gin') || name.includes('tequila')) return <GlassWater size={18} className="text-[#6D4C41]" />;
-
-  // Tobacco
-  if (name.includes('classic')) return <Flame size={18} className="text-[#6D4C41]" />;
-  if (name.includes('mix')) return <Wind size={18} className="text-[#6D4C41]" />;
-  if (name.includes('special')) return <PartyPopper size={18} className="text-[#6D4C41]" />;
-
-  // Fallback
-  return <Utensils size={18} className="text-[#6D4C41]" />;
-};
 
 export default function MenuCategoriesModal({ isOpen, onClose, onCategorySelect, type = 'food', availableCategories }: MenuCategoriesModalProps) {
   const { categories } = useMenu();
@@ -70,7 +31,7 @@ export default function MenuCategoriesModal({ isOpen, onClose, onCategorySelect,
       className="fixed inset-0 z-[60] flex items-end justify-center bg-[rgba(22,43,57,0.7)]"
       onClick={onClose}
     >
-      {/* Bottom sheet — pure white background, rounded top corners */}
+      {/* Bottom sheet */}
       <div
         className="w-[393px] max-h-[80vh] bg-white rounded-t-[40px] flex flex-col items-center relative pb-[30px]"
         onClick={e => e.stopPropagation()}
@@ -87,11 +48,8 @@ export default function MenuCategoriesModal({ isOpen, onClose, onCategorySelect,
               <div
                 key={cat.name}
                 onClick={() => onCategorySelect?.(cat.name)}
-                className="flex flex-row items-center gap-[12px] cursor-pointer hover:opacity-80 transition-opacity"
+                className="cursor-pointer hover:opacity-70 transition-opacity"
               >
-                <div className="flex items-center justify-center w-[20px] h-[20px]">
-                  {getCategoryIcon(cat.name)}
-                </div>
                 <span className="font-playfair font-medium text-[20px] leading-[24px] text-[#4A4A4A]">
                   {cat.name}
                 </span>

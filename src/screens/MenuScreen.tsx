@@ -24,49 +24,52 @@ const GROUP_IMAGES: Record<string, string> = {
 };
 const DEFAULT_GROUP_IMAGE = 'https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?auto=compress&cs=tinysrgb&w=200';
 
-// ── Dish card (text-only, no images — Template 4's defining feature) ─────────
+// ── Dish card ─────────────────────────────────────────────────────────────────
 function DishCard({ dish, onClick }: { dish: ApiMenuItem; onClick: () => void }) {
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
+  const imgSrc = dish.thumbnail || dish.image;
+
   return (
     <div
       onClick={dish.inStock ? onClick : undefined}
-      className={`flex flex-col items-start gap-1 w-full py-4 border-b border-brand-divider ${dish.inStock ? 'cursor-pointer' : 'opacity-50'}`}
+      className={`flex flex-row items-start gap-3 w-full py-4 border-b border-brand-divider ${dish.inStock ? 'cursor-pointer' : 'opacity-50'}`}
     >
-      <div className="flex flex-col gap-1 w-full">
-        <div className="flex justify-between items-start w-full">
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <VegDot isVeg={dish.veg} size={15} />
-              <span className="font-playfair font-semibold text-[20px] leading-tight text-brand-brown">
-                {dish.name}
-              </span>
-            </div>
-            {dish.recommended && (
-              <div className="flex">
-                <span className="font-inter font-semibold text-[10px] uppercase tracking-wide text-white px-2 py-0.5 bg-brand-accent rounded">
-                  Recommended
-                </span>
-              </div>
-            )}
-          </div>
-          <span className="font-roboto font-medium text-[16px] text-brand-brown shrink-0 ml-4 pt-1">
-            ₹{dish.price}
+      {/* Left: text content */}
+      <div className="flex flex-col gap-1 flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <VegDot isVeg={dish.veg} size={15} />
+          <span className="font-playfair font-semibold text-[19px] leading-tight text-brand-brown truncate">
+            {dish.name}
           </span>
         </div>
 
+        {dish.recommended && (
+          <div className="flex">
+            <span className="font-inter font-semibold text-[10px] uppercase tracking-wide text-white px-2 py-0.5 bg-brand-accent rounded">
+              Recommended
+            </span>
+          </div>
+        )}
+
+        <span className="font-roboto font-medium text-[15px] text-brand-brown">
+          ₹{dish.price}
+        </span>
+
         {dish.description && (
-          <p className="font-inter font-normal text-[13px] leading-relaxed text-brand-muted line-clamp-3 mt-1">
+          <p className="font-inter font-normal text-[12px] leading-relaxed text-brand-muted line-clamp-2">
             {dish.description}
           </p>
         )}
 
         {!dish.inStock && (
-          <span className="font-inter font-medium text-[11px] text-brand-nonVeg mt-1">
+          <span className="font-inter font-medium text-[11px] text-brand-nonVeg">
             Out of stock
           </span>
         )}
 
         {dish.prepTime && (
-          <div className="flex items-center gap-1 mt-1 opacity-60">
+          <div className="flex items-center gap-1 opacity-60">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
               <circle cx="6" cy="6" r="5" stroke="#C76A3A" strokeWidth="1" />
               <line x1="6" y1="3" x2="6" y2="6.5" stroke="#C76A3A" strokeWidth="1" strokeLinecap="round" />
@@ -78,6 +81,23 @@ function DishCard({ dish, onClick }: { dish: ApiMenuItem; onClick: () => void })
           </div>
         )}
       </div>
+
+      {/* Right: dish image */}
+      {imgSrc && !imgError ? (
+        <div className="shrink-0 w-[90px] h-[90px] rounded-[8px] overflow-hidden bg-brand-divider">
+          <img
+            src={imgSrc}
+            alt={dish.name}
+            loading="lazy"
+            decoding="async"
+            onLoad={() => setImgLoaded(true)}
+            onError={() => setImgError(true)}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+          />
+        </div>
+      ) : (
+        <div className="shrink-0 w-[90px] h-[90px]" />
+      )}
     </div>
   );
 }
