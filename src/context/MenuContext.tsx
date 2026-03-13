@@ -3,8 +3,8 @@ import { useParams } from 'react-router-dom';
 import type { MenuData, ApiCategory, ApiMenuItem } from '../types/api';
 import { fetchMenuBySlug, MenuFetchError, type MenuErrorCode } from '../services/api';
 
-// ── Refresh interval (5 minutes) ────────────────────────────────────────────
-const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+// ── Refresh interval (1 minute) ─────────────────────────────────────────────
+const REFRESH_INTERVAL_MS = 1 * 60 * 1000;
 
 // ── Retry delay for MENU_LOADING state ──────────────────────────────────────
 const LOADING_RETRY_MS = 3000;
