@@ -41,6 +41,11 @@ export interface ApiMenuItem {
 export interface ApiCategory {
   id: string;
   name: string;
+  group?: string;
+  parentId?: string | null;
+  parentName?: string | null;
+  isParent?: boolean;
+  description?: string | null;
   items: ApiMenuItem[];
 }
 

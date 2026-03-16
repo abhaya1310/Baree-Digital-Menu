@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import type { MenuData, ApiCategory, ApiMenuItem } from '../types/api';
 import { fetchMenuBySlug, MenuFetchError, type MenuErrorCode } from '../services/api';
@@ -39,6 +39,8 @@ interface MenuContextValue {
   refetch: () => void;
   categories: ApiCategory[];
   allItems: ApiMenuItem[];
+  parentCategories: ApiCategory[];
+  getChildCategories: (parentId: string) => ApiCategory[];
 }
 
 const MenuContext = createContext<MenuContextValue | null>(null);
@@ -127,6 +129,16 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
   const categories = menu?.categories ?? [];
   const allItems = categories.flatMap((cat) => cat.items);
 
+  const parentCategories = useMemo(() =>
+    categories.filter(cat => !cat.parentId),
+    [categories]
+  );
+
+  const getChildCategories = useCallback((parentId: string) =>
+    categories.filter(cat => cat.parentId === parentId),
+    [categories]
+  );
+
   return (
     <MenuContext.Provider
       value={{
@@ -137,6 +149,8 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
         refetch: fetchMenu,
         categories,
         allItems,
+        parentCategories,
+        getChildCategories,
       }}
     >
       {children}
