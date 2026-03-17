@@ -1,9 +1,18 @@
 import { useState, useEffect } from 'react';
 
+export interface FilterCriteria {
+  allergies: string[];
+  prepTime: string | null;
+  priceMax: number;
+  sortOrder: string | null;
+  dietTypes: string[];
+  preferences: string[];
+}
+
 interface FilterModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onApply: (count: number) => void;
+  onApply: (criteria: FilterCriteria, count: number) => void;
   type?: 'food' | 'drinks' | 'tobacco';
 }
 
@@ -71,6 +80,15 @@ const FilterModal = ({ isOpen, onClose, onApply, type = 'food' }: FilterModalPro
 
   if (!isOpen) return null;
 
+  const buildCriteria = (): FilterCriteria => ({
+    allergies: [...selectedAllergies],
+    prepTime: selectedPrepTime,
+    priceMax,
+    sortOrder: sortOrder === 'lowToHigh' ? 'low-high' : sortOrder === 'highToLow' ? 'high-low' : null,
+    dietTypes: [...selectedDiet],
+    preferences: [...selectedPreferences],
+  });
+
   const handleApply = () => {
     let count = 0;
     if (type === 'food') {
@@ -83,7 +101,7 @@ const FilterModal = ({ isOpen, onClose, onApply, type = 'food' }: FilterModalPro
       if (selectedPrepTime) count++;
       if (selectedOccasion) count++;
     }
-    onApply(count);
+    onApply(buildCriteria(), count);
     onClose();
   };
 
@@ -96,6 +114,14 @@ const FilterModal = ({ isOpen, onClose, onApply, type = 'food' }: FilterModalPro
     setSelectedDiet([]);
     setSelectedPreferences([]);
     setSelectedPriceRange(null);
+    onApply({
+      allergies: [],
+      prepTime: null,
+      priceMax: 2000,
+      sortOrder: null,
+      dietTypes: [],
+      preferences: [],
+    }, 0);
   };
 
   const toggleList = (list: string[], item: string, setter: React.Dispatch<React.SetStateAction<string[]>>) => {

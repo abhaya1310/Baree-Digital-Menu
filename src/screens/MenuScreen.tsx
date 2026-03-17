@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import DishDetailModal from '../DishDetailModal';
 import MenuCategoriesModal from '../MenuCategoriesModal';
-import FilterModal from '../FilterModal';
+import FilterModal, { type FilterCriteria } from '../FilterModal';
 import SearchOverlay from '../SearchOverlay';
 import { useMenu } from '../context/MenuContext';
 import type { ApiMenuItem, ApiCategory } from '../types/api';
@@ -24,8 +24,50 @@ const GROUP_IMAGES: Record<string, string> = {
 };
 const DEFAULT_GROUP_IMAGE = 'https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?auto=compress&cs=tinysrgb&w=200';
 
+// ── Filter matching helper ───────────────────────────────────────────────────
+function isItemFilteredOut(item: ApiMenuItem, criteria: FilterCriteria | null): boolean {
+  if (!criteria) return false;
+
+  if (criteria.allergies.length > 0 && item.allergies?.length) {
+    const hasMatchingAllergy = item.allergies.some(a =>
+      criteria.allergies.some(selected => a.toLowerCase().includes(selected.toLowerCase()))
+    );
+    if (hasMatchingAllergy) return true;
+  }
+
+  if (criteria.prepTime && item.prepTime) {
+    if (criteria.prepTime === 'Quick bites' && item.prepTime > 5) return true;
+    if (criteria.prepTime === '5-10 mins' && (item.prepTime < 5 || item.prepTime > 10)) return true;
+    if (criteria.prepTime === '10-15 mins' && (item.prepTime < 10 || item.prepTime > 15)) return true;
+    if (criteria.prepTime === '15+ mins' && item.prepTime < 15) return true;
+  }
+
+  if (criteria.priceMax > 0 && criteria.priceMax < 2000 && item.price > criteria.priceMax) return true;
+
+  if (criteria.dietTypes.length > 0) {
+    const itemFilters = (item.filters || []).map(f => f.value.toLowerCase());
+    const itemLabel = (item.label || '').toLowerCase();
+    const hasMatchingDiet = criteria.dietTypes.some(diet => {
+      const d = diet.toLowerCase();
+      return itemFilters.some(f => f.includes(d)) || itemLabel.includes(d);
+    });
+    if (!hasMatchingDiet) return true;
+  }
+
+  if (criteria.preferences.length > 0) {
+    const itemFilters = (item.filters || []).map(f => f.value.toLowerCase());
+    const hasMatchingPref = criteria.preferences.some(pref => {
+      const p = pref.toLowerCase();
+      return itemFilters.some(f => f.includes(p));
+    });
+    if (!hasMatchingPref) return true;
+  }
+
+  return false;
+}
+
 // ── Dish card ─────────────────────────────────────────────────────────────────
-function DishCard({ dish, onClick }: { dish: ApiMenuItem; onClick: () => void }) {
+function DishCard({ dish, onClick, dimmed = false }: { dish: ApiMenuItem; onClick: () => void; dimmed?: boolean }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
   const imgSrc = dish.thumbnail || dish.image;
@@ -33,7 +75,11 @@ function DishCard({ dish, onClick }: { dish: ApiMenuItem; onClick: () => void })
   return (
     <div
       onClick={dish.inStock ? onClick : undefined}
-      className={`flex flex-row items-start gap-3 w-full py-4 border-b border-brand-divider ${dish.inStock ? 'cursor-pointer' : 'opacity-50'}`}
+      className={[
+        'flex flex-row items-start gap-3 w-full py-4 border-b border-brand-divider',
+        !dish.inStock ? 'opacity-50' : dimmed ? 'opacity-40' : '',
+        dish.inStock ? 'cursor-pointer' : '',
+      ].join(' ')}
     >
       {/* Left: text content */}
       <div className="flex flex-col gap-1 flex-1 min-w-0">
@@ -107,12 +153,14 @@ function ChildCategorySection({
   category,
   filterType,
   searchQuery,
+  filterCriteria,
   onItemClick,
   sectionRef,
 }: {
   category: ApiCategory;
   filterType: 'ALL' | 'VEG' | 'NON-VEG';
   searchQuery: string;
+  filterCriteria: FilterCriteria | null;
   onItemClick: (item: ApiMenuItem) => void;
   sectionRef?: (el: HTMLDivElement | null) => void;
 }) {
@@ -151,7 +199,7 @@ function ChildCategorySection({
       {/* Items list */}
       <div className="flex flex-col w-full">
         {items.map((dish) => (
-          <DishCard key={dish.id} dish={dish} onClick={() => onItemClick(dish)} />
+          <DishCard key={dish.id} dish={dish} onClick={() => onItemClick(dish)} dimmed={isItemFilteredOut(dish, filterCriteria)} />
         ))}
       </div>
     </div>
@@ -167,6 +215,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [activeFilterCount, setActiveFilterCount] = useState(0);
+  const [filterCriteria, setFilterCriteria] = useState<FilterCriteria | null>(null);
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -403,7 +452,10 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
       <FilterModal
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
-        onApply={(count) => setActiveFilterCount(count)}
+        onApply={(criteria, count) => {
+          setFilterCriteria(count > 0 ? criteria : null);
+          setActiveFilterCount(count);
+        }}
         type="food"
       />
       <SearchOverlay
@@ -591,7 +643,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
               </div>
             ) : (
               filteredRecommended.map((dish) => (
-                <DishCard key={dish.id} dish={dish} onClick={() => setSelectedDish(dish)} />
+                <DishCard key={dish.id} dish={dish} onClick={() => setSelectedDish(dish)} dimmed={isItemFilteredOut(dish, filterCriteria)} />
               ))
             )}
           </div>
@@ -606,6 +658,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
                 category={child}
                 filterType={filterType}
                 searchQuery={searchQuery}
+                filterCriteria={filterCriteria}
                 onItemClick={setSelectedDish}
                 sectionRef={(el) => {
                   if (el) sectionRefs.current.set(child.id, el);
@@ -620,7 +673,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
         {activeParentId !== null && activeChildCategories.length === 0 && parentDirectItems.length > 0 && (
           <div className="flex flex-col w-full">
             {parentDirectItems.map((dish) => (
-              <DishCard key={dish.id} dish={dish} onClick={() => setSelectedDish(dish)} />
+              <DishCard key={dish.id} dish={dish} onClick={() => setSelectedDish(dish)} dimmed={isItemFilteredOut(dish, filterCriteria)} />
             ))}
           </div>
         )}
@@ -636,7 +689,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
         {activeFilterCount > 0 && (
           <div className="flex justify-center mt-6">
             <button
-              onClick={() => setActiveFilterCount(0)}
+              onClick={() => { setActiveFilterCount(0); setFilterCriteria(null); }}
               className="w-[146px] h-[33px] bg-brand-accent rounded-[80px] border-0 cursor-pointer flex justify-center items-center px-[10px]"
             >
               <span className="font-inter font-semibold text-[13px] leading-[16px] text-white">
