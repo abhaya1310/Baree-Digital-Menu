@@ -366,9 +366,9 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
         {/* Logo */}
         <div className="flex justify-center pt-[30px] pb-[10px]">
           {logoUrl ? (
-            <img src={logoUrl} alt="Logo" className={showLargerLogo ? 'w-[140px] h-[50px] object-contain' : 'w-[100px] h-[35px] object-contain'} />
+            <img src={logoUrl} alt={menu?.outlet?.brand?.name || 'Menu'} className={showLargerLogo ? 'w-[140px] h-[50px] object-contain' : 'w-[100px] h-[35px] object-contain'} />
           ) : (
-            <img src="/logo.png" alt="Logo" className={showLargerLogo ? 'w-[140px] h-[50px] object-contain' : 'w-[100px] h-[35px] object-contain'} />
+            <span className="font-playfair font-semibold text-brand-brown text-[22px]">{menu?.outlet?.brand?.name || 'Menu'}</span>
           )}
         </div>
 

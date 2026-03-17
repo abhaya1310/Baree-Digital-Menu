@@ -171,9 +171,9 @@ const SearchOverlay = ({ isOpen, onClose, onSearch, initialQuery = '', items: pr
         {/* Logo */}
         <div className="flex justify-center w-full mb-[15px]">
           {logoUrl ? (
-            <img src={logoUrl} alt="Logo" className="w-[100px] h-[35px] object-contain" />
+            <img src={logoUrl} alt={menu?.outlet?.brand?.name || 'Menu'} className="w-[100px] h-[35px] object-contain" />
           ) : (
-            <img src="/logo.png" alt="Logo" className="w-[100px] h-[35px] object-contain" />
+            <span className="font-playfair font-semibold text-brand-brown text-[22px]">{menu?.outlet?.brand?.name || 'Menu'}</span>
           )}
         </div>
 

@@ -24,9 +24,9 @@ export default function DrinksScreen({
         {/* Logo */}
         <div className="flex justify-center pt-[29px] pb-[10px]">
           {logoUrl ? (
-            <img src={logoUrl} alt="Logo" className="w-[100px] h-[35px] object-contain" />
+            <img src={logoUrl} alt={menu?.outlet?.brand?.name || 'Menu'} className="w-[100px] h-[35px] object-contain" />
           ) : (
-            <img src="/logo.png" alt="Logo" className="w-[100px] h-[35px] object-contain" />
+            <span className="font-playfair font-semibold text-brand-brown text-[22px]">{menu?.outlet?.brand?.name || 'Menu'}</span>
           )}
         </div>
 

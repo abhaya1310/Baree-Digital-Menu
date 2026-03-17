@@ -21,9 +21,9 @@ export default function SpecialsScreen({ onNavigateToMenu }: SpecialsScreenProps
         {/* Logo */}
         <div className="flex justify-center py-6">
           {logoUrl ? (
-            <img src={logoUrl} alt="Logo" className="h-12" />
+            <img src={logoUrl} alt={menu?.outlet?.brand?.name || 'Menu'} className="h-12" />
           ) : (
-            <img src="/logo.png" alt="Logo" className="h-12" />
+            <span className="font-playfair font-semibold text-brand-brown text-[22px]">{menu?.outlet?.brand?.name || 'Menu'}</span>
           )}
         </div>
 
