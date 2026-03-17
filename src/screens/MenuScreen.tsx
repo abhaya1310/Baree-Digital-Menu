@@ -356,7 +356,24 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
       <SearchOverlay
         isOpen={isSearchActive}
         onClose={() => setIsSearchActive(false)}
-        onSearch={(text) => setSearchQuery(text)}
+        onSearch={(text) => {
+          // Find the item's category and switch to its parent tab
+          const lowerTerm = text.toLowerCase();
+          for (const cat of categories) {
+            const foundItem = cat.items.find(i => i.name.toLowerCase() === lowerTerm);
+            if (foundItem) {
+              const parentId = cat.parentId || cat.id;
+              setActiveParentId(parentId);
+              setFilterType('ALL');
+              setSearchQuery('');
+              setSelectedDish(foundItem);
+              setIsSearchActive(false);
+              return;
+            }
+          }
+          // Fallback: just set search query
+          setSearchQuery(text);
+        }}
         initialQuery={searchQuery}
         items={allItems}
       />
