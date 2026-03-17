@@ -64,6 +64,51 @@ function handleMenuResponse(response: Response, result: unknown): MenuData {
   return result as MenuData;
 }
 
+// ── Outlet access points (for POS selection landing page) ──────────────────
+
+export interface OutletAccessPoint {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface OutletInfo {
+  outlet: { id: string; name: string; address?: string };
+  brand: { name: string; logo?: string };
+  accessPoints: OutletAccessPoint[];
+}
+
+export async function fetchOutletAccessPoints(
+  brandSlug: string,
+  outletSlug: string,
+): Promise<OutletInfo> {
+  const url = `${API_BASE_URL}/public/outlet/${encodeURIComponent(brandSlug)}/${encodeURIComponent(outletSlug)}`;
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch {
+    throw new MenuFetchError('NETWORK_ERROR', 'Unable to connect. Please check your internet connection and try again.');
+  }
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new MenuFetchError('MENU_NOT_FOUND', 'This outlet was not found. Please scan a valid QR code.');
+    }
+    throw new MenuFetchError('NETWORK_ERROR', 'Failed to load outlet information. Please try again.');
+  }
+
+  const result = await response.json();
+  if (result.success === false) {
+    throw new MenuFetchError('MENU_NOT_FOUND', result.error || 'Outlet not found.');
+  }
+
+  return result.data as OutletInfo;
+}
+
 // ── Fetch by brand/outlet/access-point slugs (primary) ──────────────────────
 
 export async function fetchMenuBySlug(
