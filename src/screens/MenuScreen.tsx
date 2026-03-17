@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import DishDetailModal from '../DishDetailModal';
 import MenuCategoriesModal from '../MenuCategoriesModal';
 import FilterModal from '../FilterModal';
@@ -108,11 +108,13 @@ function ChildCategorySection({
   filterType,
   searchQuery,
   onItemClick,
+  sectionRef,
 }: {
   category: ApiCategory;
   filterType: 'ALL' | 'VEG' | 'NON-VEG';
   searchQuery: string;
   onItemClick: (item: ApiMenuItem) => void;
+  sectionRef?: (el: HTMLDivElement | null) => void;
 }) {
   const items = useMemo(() => {
     let filtered = category.items;
@@ -132,7 +134,7 @@ function ChildCategorySection({
   if (items.length === 0) return null;
 
   return (
-    <div className="mb-2">
+    <div ref={sectionRef} data-category-id={category.id} className="mb-2">
       {/* Section header */}
       <div className="flex items-center gap-[8px] px-1 py-[10px] mb-1">
         <span className="font-playfair font-semibold text-[16px] leading-[20px] text-brand-brown">
@@ -170,6 +172,11 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
 
   // Parent category tab state: null = "Offers for you"
   const [activeParentId, setActiveParentId] = useState<string | null>(null);
+
+  // Refs for scroll-based category highlighting
+  const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const tabRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const isUserTabClick = useRef(false);
 
   const showGroupCards = uniqueGroups.length > 1;
   const showLargerLogo = uniqueGroups.length <= 1;
@@ -212,7 +219,9 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
   }, [groupFilteredParentCategories, activeParentId, hasRecommended]);
 
   const handleParentTabChange = useCallback((parentId: string | null) => {
+    isUserTabClick.current = true;
     setActiveParentId(parentId);
+    setTimeout(() => { isUserTabClick.current = false; }, 500);
   }, []);
 
   // Reset parent tab when group changes
@@ -264,6 +273,50 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
       return items.length > 0;
     });
   }, [activeParentId, getChildCategories, filterType, searchQuery]);
+
+  // IntersectionObserver to track which section is visible and update parent tab
+  useEffect(() => {
+    if (!activeParentId) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (isUserTabClick.current) return;
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const categoryId = entry.target.getAttribute('data-category-id');
+            if (categoryId) {
+              const cat = categories.find(c => c.id === categoryId);
+              if (cat) {
+                const parentId = cat.parentId || cat.id;
+                if (parentId !== activeParentId) {
+                  setActiveParentId(parentId);
+                }
+              }
+            }
+            break;
+          }
+        }
+      },
+      {
+        rootMargin: '-100px 0px -60% 0px',
+        threshold: 0,
+      }
+    );
+
+    sectionRefs.current.forEach((el) => {
+      observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [activeChildCategories, activeParentId, categories]);
+
+  // Auto-scroll the parent tab bar to keep the active tab visible
+  useEffect(() => {
+    const activeTab = tabRefs.current.get(activeParentId || 'offers');
+    if (activeTab) {
+      activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }, [activeParentId]);
 
   // If the parent has no children but has items directly
   const parentDirectItems = useMemo(() => {
@@ -437,6 +490,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
               <div className="flex flex-col items-center gap-[4px] shrink-0">
                 <div className="flex flex-row items-center gap-[3px]">
                   <button
+                    ref={(el) => { if (el) tabRefs.current.set('offers', el); else tabRefs.current.delete('offers'); }}
                     onClick={() => handleParentTabChange(null)}
                     className={[
                       'bg-transparent border-0 cursor-pointer p-0 font-inter font-medium text-[16px] leading-[19px] whitespace-nowrap',
@@ -473,6 +527,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
               return (
                 <div key={cat.id} className="flex flex-col items-center gap-[4px] shrink-0">
                   <button
+                    ref={(el) => { if (el) tabRefs.current.set(cat.id, el); else tabRefs.current.delete(cat.id); }}
                     onClick={() => handleParentTabChange(cat.id)}
                     className={[
                       'bg-transparent border-0 cursor-pointer p-0 font-inter font-medium text-[16px] leading-[19px] whitespace-nowrap',
@@ -552,6 +607,10 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
                 filterType={filterType}
                 searchQuery={searchQuery}
                 onItemClick={setSelectedDish}
+                sectionRef={(el) => {
+                  if (el) sectionRefs.current.set(child.id, el);
+                  else sectionRefs.current.delete(child.id);
+                }}
               />
             ))}
           </div>
