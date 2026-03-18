@@ -20,6 +20,22 @@ function getItemImage(item: ApiMenuItem): string | null {
   return item.image || item.thumbnail || null;
 }
 
+// ── Group type helper ──────────────────────────────────────────────────────
+function getGroupType(group: string): 'food' | 'beverage' | 'tobacco' | 'other' {
+  const g = group.toUpperCase();
+  if (g === 'FOOD' || g === 'BUFFET') return 'food';
+  if (g === 'BEVERAGES' || g === 'BEVERAGE' || g === 'DRINKS') return 'beverage';
+  if (g === 'TOBACCO') return 'tobacco';
+  return 'other';
+}
+
+// ── Alcoholic detection helper ─────────────────────────────────────────────
+const ALCOHOLIC_KEYWORDS = ['alcohol', 'liquor', 'beer', 'wine', 'whiskey', 'vodka', 'rum', 'gin', 'cocktail', 'spirits', 'scotch', 'bourbon'];
+function isAlcoholicItem(_item: ApiMenuItem, category?: ApiCategory): boolean {
+  const catName = (category?.name || '').toLowerCase();
+  return ALCOHOLIC_KEYWORDS.some(kw => catName.includes(kw));
+}
+
 // ── Filter matching helper ───────────────────────────────────────────────────
 function isItemFilteredOut(item: ApiMenuItem, criteria: FilterCriteria | null): boolean {
   if (!criteria) return false;
@@ -63,7 +79,7 @@ function isItemFilteredOut(item: ApiMenuItem, criteria: FilterCriteria | null): 
 }
 
 // ── Dish card — text LEFT, image RIGHT ──────────────────────────────────────
-function DishCard({ dish, onClick, dimmed = false }: { dish: ApiMenuItem; onClick: () => void; dimmed?: boolean }) {
+function DishCard({ dish, onClick, dimmed = false, showVegDot = true }: { dish: ApiMenuItem; onClick: () => void; dimmed?: boolean; showVegDot?: boolean }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
   const imgSrc = getItemImage(dish);
@@ -82,7 +98,7 @@ function DishCard({ dish, onClick, dimmed = false }: { dish: ApiMenuItem; onClic
         {/* Recommended badge */}
         {dish.inStock && dish.recommended && (
           <div className="flex items-center gap-1.5 mb-0.5">
-            <VegDot isVeg={dish.veg} size={10} />
+            {showVegDot && <VegDot isVeg={dish.veg} size={10} />}
             <span className="font-inter font-semibold text-[10px] uppercase tracking-wide text-white px-1.5 py-0.5 bg-brand-accent rounded-sm">
               Highly Recommended
             </span>
@@ -96,7 +112,7 @@ function DishCard({ dish, onClick, dimmed = false }: { dish: ApiMenuItem; onClic
 
         {/* Price + prep time row */}
         <div className="flex items-center gap-1.5">
-          {!(dish.recommended && dish.inStock) && <VegDot isVeg={dish.veg} size={10} />}
+          {showVegDot && !(dish.recommended && dish.inStock) && <VegDot isVeg={dish.veg} size={10} />}
           <span className="font-roboto font-medium text-[13px] text-brand-brown">
             {'\u20B9'}{dish.price}
           </span>
@@ -176,18 +192,22 @@ function ChildCategorySection({
   filterCriteria,
   onItemClick,
   sectionRef,
+  showVegDot = true,
 }: {
   category: ApiCategory;
-  filterType: 'ALL' | 'VEG' | 'NON-VEG';
+  filterType: string;
   searchQuery: string;
   filterCriteria: FilterCriteria | null;
   onItemClick: (item: ApiMenuItem) => void;
   sectionRef?: (el: HTMLDivElement | null) => void;
+  showVegDot?: boolean;
 }) {
   const items = useMemo(() => {
     let filtered = category.items;
     if (filterType === 'VEG') filtered = filtered.filter(i => i.veg);
     if (filterType === 'NON-VEG') filtered = filtered.filter(i => !i.veg);
+    if (filterType === 'ALCOHOLIC') filtered = filtered.filter(i => isAlcoholicItem(i, category));
+    if (filterType === 'NON-ALCOHOLIC') filtered = filtered.filter(i => !isAlcoholicItem(i, category));
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       filtered = filtered.filter(i =>
@@ -219,7 +239,7 @@ function ChildCategorySection({
       {/* Items list */}
       <div className="flex flex-col w-full">
         {items.map((dish) => (
-          <DishCard key={dish.id} dish={dish} onClick={() => onItemClick(dish)} dimmed={isItemFilteredOut(dish, filterCriteria)} />
+          <DishCard key={dish.id} dish={dish} onClick={() => onItemClick(dish)} dimmed={isItemFilteredOut(dish, filterCriteria)} showVegDot={showVegDot} />
         ))}
       </div>
     </div>
@@ -230,7 +250,7 @@ function ChildCategorySection({
 export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupChange, uniqueGroups }: MenuScreenProps) {
   const { menu, categories, allItems, parentCategories, getChildCategories, offers, groupImages } = useMenu();
 
-  const [filterType, setFilterType] = useState<'ALL' | 'VEG' | 'NON-VEG'>('ALL');
+  const [filterType, setFilterType] = useState<string>('ALL');
   const [selectedDish, setSelectedDish] = useState<ApiMenuItem | null>(null);
   const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -252,6 +272,21 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
 
   const logoUrl = menu?.outlet?.brand?.logo;
   const hasOffers = offers.length > 0;
+
+  // Group type and dynamic filter options
+  const groupType = getGroupType(activeGroup || 'Food');
+  const showVegDot = groupType === 'food';
+
+  const filterOptions = useMemo(() => {
+    if (groupType === 'food') return ['ALL', 'VEG', 'NON-VEG'] as const;
+    if (groupType === 'beverage') return ['ALL', 'ALCOHOLIC', 'NON-ALCOHOLIC'] as const;
+    return [] as const;
+  }, [groupType]);
+
+  // Reset filter when group changes
+  useEffect(() => {
+    setFilterType('ALL');
+  }, [activeGroup]);
 
   // Initialize activeGroup to first group if not set
   useEffect(() => {
@@ -350,6 +385,8 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
         let items = cat.items;
         if (filterType === 'VEG') items = items.filter(i => i.veg);
         if (filterType === 'NON-VEG') items = items.filter(i => !i.veg);
+        if (filterType === 'ALCOHOLIC') items = items.filter(i => isAlcoholicItem(i, cat));
+        if (filterType === 'NON-ALCOHOLIC') items = items.filter(i => !isAlcoholicItem(i, cat));
         if (searchQuery) {
           const q = searchQuery.toLowerCase();
           items = items.filter(i =>
@@ -370,6 +407,8 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
         let items = parent.items;
         if (filterType === 'VEG') items = items.filter(i => i.veg);
         if (filterType === 'NON-VEG') items = items.filter(i => !i.veg);
+        if (filterType === 'ALCOHOLIC') items = items.filter(i => isAlcoholicItem(i, parent));
+        if (filterType === 'NON-ALCOHOLIC') items = items.filter(i => !isAlcoholicItem(i, parent));
         if (searchQuery) {
           const q = searchQuery.toLowerCase();
           items = items.filter(i =>
@@ -464,13 +503,22 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
         ? children.some(child => {
             if (filterType === 'ALL') return child.items.length > 0;
             if (filterType === 'VEG') return child.items.some(i => i.veg);
-            return child.items.some(i => !i.veg);
+            if (filterType === 'NON-VEG') return child.items.some(i => !i.veg);
+            if (filterType === 'ALCOHOLIC') return child.items.some(i => isAlcoholicItem(i, child));
+            if (filterType === 'NON-ALCOHOLIC') return child.items.some(i => !isAlcoholicItem(i, child));
+            return child.items.length > 0;
           })
         : (filterType === 'ALL'
             ? cat.items.length > 0
             : filterType === 'VEG'
               ? cat.items.some(i => i.veg)
-              : cat.items.some(i => !i.veg));
+              : filterType === 'NON-VEG'
+                ? cat.items.some(i => !i.veg)
+                : filterType === 'ALCOHOLIC'
+                  ? cat.items.some(i => isAlcoholicItem(i, cat))
+                  : filterType === 'NON-ALCOHOLIC'
+                    ? cat.items.some(i => !isAlcoholicItem(i, cat))
+                    : cat.items.length > 0);
       if (hasVisibleItems) names.push(cat.name);
     });
     return names;
@@ -560,12 +608,12 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
           </div>
         )}
 
-        {/* Veg / All / Non-veg pill bar */}
+        {/* Veg / All / Non-veg pill bar — hidden for tobacco/other */}
+        {filterOptions.length > 0 && (
         <div className="w-full h-[36px] rounded-[50px] border-[0.6px] border-brand-border shadow-[0px_2.3px_2px_rgba(124,63,32,0.25)] p-[3px] bg-brand-white box-border flex items-center mx-auto mb-4">
           <div className="flex flex-row items-center gap-[10px] w-full h-[30px]">
-            {(['ALL', 'VEG', 'NON-VEG'] as const).map((f) => {
+            {filterOptions.map((f) => {
               const active = filterType === f;
-              const pillWidth = active && f === 'NON-VEG' ? '112px' : '104px';
               return (
                 <button
                   key={f}
@@ -576,7 +624,6 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
                       ? 'bg-brand-brown border-[0.2px] border-brand-border text-white'
                       : 'bg-white text-brand-brown opacity-80',
                   ].join(' ')}
-                  style={{ width: pillWidth }}
                 >
                   {f}
                 </button>
@@ -584,6 +631,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
             })}
           </div>
         </div>
+        )}
 
         {/* Parent category tabs */}
         <div className="mt-3">
@@ -618,13 +666,22 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
                 ? children.some(child => {
                     if (filterType === 'ALL') return child.items.length > 0;
                     if (filterType === 'VEG') return child.items.some(i => i.veg);
-                    return child.items.some(i => !i.veg);
+                    if (filterType === 'NON-VEG') return child.items.some(i => !i.veg);
+                    if (filterType === 'ALCOHOLIC') return child.items.some(i => isAlcoholicItem(i, child));
+                    if (filterType === 'NON-ALCOHOLIC') return child.items.some(i => !isAlcoholicItem(i, child));
+                    return child.items.length > 0;
                   })
                 : (filterType === 'ALL'
                     ? cat.items.length > 0
                     : filterType === 'VEG'
                       ? cat.items.some(i => i.veg)
-                      : cat.items.some(i => !i.veg));
+                      : filterType === 'NON-VEG'
+                        ? cat.items.some(i => !i.veg)
+                        : filterType === 'ALCOHOLIC'
+                          ? cat.items.some(i => isAlcoholicItem(i, cat))
+                          : filterType === 'NON-ALCOHOLIC'
+                            ? cat.items.some(i => !isAlcoholicItem(i, cat))
+                            : cat.items.length > 0);
 
               if (!hasVisibleItems) return null;
 
@@ -702,7 +759,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
               </div>
             ) : (
               filteredRecommended.map((dish) => (
-                <DishCard key={dish.id} dish={dish} onClick={() => setSelectedDish(dish)} dimmed={isItemFilteredOut(dish, filterCriteria)} />
+                <DishCard key={dish.id} dish={dish} onClick={() => setSelectedDish(dish)} dimmed={isItemFilteredOut(dish, filterCriteria)} showVegDot={showVegDot} />
               ))
             )}
           </div>
@@ -735,6 +792,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
                         searchQuery={searchQuery}
                         filterCriteria={filterCriteria}
                         onItemClick={setSelectedDish}
+                        showVegDot={showVegDot}
                         sectionRef={(el) => {
                           if (el) sectionRefs.current.set(section.category!.id, el);
                           else sectionRefs.current.delete(section.category!.id);
@@ -751,9 +809,11 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
                 }
 
                 if (section.type === 'parent-direct' && section.category) {
-                  const items = filterType === 'VEG' ? section.category.items.filter(i => i.veg)
-                    : filterType === 'NON-VEG' ? section.category.items.filter(i => !i.veg)
-                    : section.category.items;
+                  let items = section.category.items;
+                  if (filterType === 'VEG') items = items.filter(i => i.veg);
+                  else if (filterType === 'NON-VEG') items = items.filter(i => !i.veg);
+                  else if (filterType === 'ALCOHOLIC') items = items.filter(i => isAlcoholicItem(i, section.category));
+                  else if (filterType === 'NON-ALCOHOLIC') items = items.filter(i => !isAlcoholicItem(i, section.category));
                   return (
                     <div key={`pd-${section.parentId}`} ref={(el) => {
                       if (el) sectionRefs.current.set(section.parentId, el);
@@ -762,7 +822,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
                       <div className="flex flex-col w-full">
                         {items.map((dish) => (
                           <DishCard key={dish.id} dish={dish}
-                            dimmed={isItemFilteredOut(dish, filterCriteria)} onClick={() => setSelectedDish(dish)} />
+                            dimmed={isItemFilteredOut(dish, filterCriteria)} onClick={() => setSelectedDish(dish)} showVegDot={showVegDot} />
                         ))}
                       </div>
                     </div>
