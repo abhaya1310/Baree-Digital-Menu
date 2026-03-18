@@ -33,7 +33,7 @@ export default function MenuCategoriesModal({ isOpen, onClose, onCategorySelect,
     >
       {/* Bottom sheet */}
       <div
-        className="w-[393px] max-h-[80vh] bg-white rounded-t-[40px] flex flex-col items-center relative pb-[30px]"
+        className="w-[393px] max-h-[60vh] bg-[#FAF7F2] rounded-t-[24px] flex flex-col items-center relative pb-[30px]"
         onClick={e => e.stopPropagation()}
       >
         {/* Title */}
