@@ -42,6 +42,7 @@ interface MenuContextValue {
   parentCategories: ApiCategory[];
   getChildCategories: (parentId: string) => ApiCategory[];
   offers: ApiOffer[];
+  groupImages: Record<string, string>;
 }
 
 const MenuContext = createContext<MenuContextValue | null>(null);
@@ -130,6 +131,7 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
   const categories = menu?.categories ?? [];
   const allItems = categories.flatMap((cat) => cat.items);
   const offers = menu?.offers ?? [];
+  const groupImages = menu?.groupImages || {};
 
   const parentCategories = useMemo(() =>
     categories.filter(cat => !cat.parentId),
@@ -154,6 +156,7 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
         parentCategories,
         getChildCategories,
         offers,
+        groupImages,
       }}
     >
       {children}

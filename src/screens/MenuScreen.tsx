@@ -228,7 +228,7 @@ function ChildCategorySection({
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupChange, uniqueGroups }: MenuScreenProps) {
-  const { menu, categories, allItems, parentCategories, getChildCategories, offers } = useMenu();
+  const { menu, categories, allItems, parentCategories, getChildCategories, offers, groupImages } = useMenu();
 
   const [filterType, setFilterType] = useState<'ALL' | 'VEG' | 'NON-VEG'>('ALL');
   const [selectedDish, setSelectedDish] = useState<ApiMenuItem | null>(null);
@@ -552,6 +552,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
               <CategoryCard
                 key={group}
                 label={group}
+                img={groupImages[group] || groupImages[group.toUpperCase()] || groupImages[group.toLowerCase()]}
                 active={activeGroup === group}
                 onClick={() => onGroupChange(group)}
               />
