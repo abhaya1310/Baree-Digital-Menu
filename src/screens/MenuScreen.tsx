@@ -4,7 +4,7 @@ import MenuCategoriesModal from '../MenuCategoriesModal';
 import FilterModal, { type FilterCriteria } from '../FilterModal';
 import SearchOverlay from '../SearchOverlay';
 import { useMenu } from '../context/MenuContext';
-import type { ApiMenuItem, ApiCategory } from '../types/api';
+import type { ApiMenuItem, ApiCategory, ApiOffer } from '../types/api';
 import CategoryCard from '../components/ui/CategoryCard';
 import MenuFab from '../components/ui/MenuFab';
 import VegDot from '../components/ui/VegDot';
@@ -14,6 +14,12 @@ interface MenuScreenProps {
   activeGroup: string | null;
   onGroupChange: (group: string | null) => void;
   uniqueGroups: string[];
+}
+
+const FALLBACK_FOOD_IMAGE = 'https://images.pexels.com/photos/1639562/pexels-photo-1639562.jpeg?auto=compress&cs=tinysrgb&w=400';
+
+function getItemImage(item: ApiMenuItem): string {
+  return item.thumbnail || item.image || FALLBACK_FOOD_IMAGE;
 }
 
 const GROUP_IMAGES: Record<string, string> = {
@@ -66,11 +72,11 @@ function isItemFilteredOut(item: ApiMenuItem, criteria: FilterCriteria | null): 
   return false;
 }
 
-// ── Dish card ─────────────────────────────────────────────────────────────────
+// ── Dish card — text LEFT, image RIGHT ──────────────────────────────────────
 function DishCard({ dish, onClick, dimmed = false }: { dish: ApiMenuItem; onClick: () => void; dimmed?: boolean }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
-  const imgSrc = dish.thumbnail || dish.image;
+  const imgSrc = getItemImage(dish);
 
   return (
     <div
@@ -83,27 +89,38 @@ function DishCard({ dish, onClick, dimmed = false }: { dish: ApiMenuItem; onClic
     >
       {/* Left: text content */}
       <div className="flex flex-col gap-1 flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <VegDot isVeg={dish.veg} size={15} />
-          <span className="font-playfair font-semibold text-[19px] leading-tight text-brand-brown truncate">
-            {dish.name}
-          </span>
-        </div>
-
-        {dish.recommended && (
-          <div className="flex">
-            <span className="font-inter font-semibold text-[10px] uppercase tracking-wide text-white px-2 py-0.5 bg-brand-accent rounded">
-              Recommended
+        {/* Recommended badge */}
+        {dish.inStock && dish.recommended && (
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <VegDot isVeg={dish.veg} size={10} />
+            <span className="font-inter font-semibold text-[10px] uppercase tracking-wide text-white px-1.5 py-0.5 bg-brand-accent rounded-sm">
+              Highly Recommended
             </span>
           </div>
         )}
 
-        <span className="font-roboto font-medium text-[15px] text-brand-brown">
-          {'\u20B9'}{dish.price}
+        {/* Name */}
+        <span className="font-playfair font-semibold text-[16px] leading-tight text-brand-brown">
+          {dish.name}
         </span>
 
-        {dish.description && (
-          <p className="font-inter font-normal text-[12px] leading-relaxed text-brand-muted line-clamp-2">
+        {/* Price + prep time row */}
+        <div className="flex items-center gap-1.5">
+          {!(dish.recommended && dish.inStock) && <VegDot isVeg={dish.veg} size={10} />}
+          <span className="font-roboto font-medium text-[13px] text-brand-brown">
+            {'\u20B9'}{dish.price}
+          </span>
+          {dish.prepTime && (
+            <>
+              <span className="text-brand-muted text-[10px]">&bull;</span>
+              <span className="font-inter text-[11px] text-brand-muted">{dish.prepTime} mins</span>
+            </>
+          )}
+        </div>
+
+        {/* Description */}
+        {dish.description?.trim() && (
+          <p className="font-inter font-normal text-[11px] leading-4 text-brand-muted line-clamp-2 mt-0.5">
             {dish.description}
           </p>
         )}
@@ -113,24 +130,11 @@ function DishCard({ dish, onClick, dimmed = false }: { dish: ApiMenuItem; onClic
             Out of stock
           </span>
         )}
-
-        {dish.prepTime && (
-          <div className="flex items-center gap-1 opacity-60">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <circle cx="6" cy="6" r="5" stroke="#C76A3A" strokeWidth="1" />
-              <line x1="6" y1="3" x2="6" y2="6.5" stroke="#C76A3A" strokeWidth="1" strokeLinecap="round" />
-              <line x1="6" y1="6.5" x2="8" y2="6.5" stroke="#C76A3A" strokeWidth="1" strokeLinecap="round" />
-            </svg>
-            <span className="font-roboto font-light text-[11px] text-brand-accent">
-              {dish.prepTime} mins
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Right: dish image */}
-      {imgSrc && !imgError ? (
-        <div className="shrink-0 w-[90px] h-[90px] rounded-[8px] overflow-hidden bg-brand-divider">
+      <div className="shrink-0 w-[120px] h-[120px] rounded-md overflow-hidden bg-brand-divider">
+        {imgSrc && !imgError ? (
           <img
             src={imgSrc}
             alt={dish.name}
@@ -140,9 +144,37 @@ function DishCard({ dish, onClick, dimmed = false }: { dish: ApiMenuItem; onClic
             onError={() => setImgError(true)}
             className={`w-full h-full object-cover transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
           />
+        ) : (
+          <div className="w-full h-full bg-brand-divider" />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Offer banner card ────────────────────────────────────────────────────────
+function OfferBannerCard({ offer }: { offer: ApiOffer }) {
+  return (
+    <div className="w-full rounded-xl bg-white p-4 flex items-start gap-3 border border-brand-border">
+      <div className="flex-1">
+        <h3 className="font-playfair font-bold text-[20px] text-brand-brown leading-tight">
+          {offer.title}
+        </h3>
+        {offer.description && (
+          <p className="font-inter text-[12px] text-brand-muted mt-2 leading-[18px]">
+            {offer.description}
+          </p>
+        )}
+        {offer.discount && (
+          <span className="inline-block mt-2 bg-brand-accent text-white font-inter font-semibold text-[11px] px-3 py-1 rounded-full">
+            {offer.discount}
+          </span>
+        )}
+      </div>
+      {offer.image_url && (
+        <div className="w-[100px] h-[100px] rounded-lg overflow-hidden shrink-0">
+          <img src={offer.image_url} alt={offer.title} className="w-full h-full object-cover" />
         </div>
-      ) : (
-        <div className="shrink-0 w-[90px] h-[90px]" />
       )}
     </div>
   );
@@ -208,7 +240,7 @@ function ChildCategorySection({
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupChange, uniqueGroups }: MenuScreenProps) {
-  const { menu, categories, allItems, parentCategories, getChildCategories } = useMenu();
+  const { menu, categories, allItems, parentCategories, getChildCategories, offers } = useMenu();
 
   const [filterType, setFilterType] = useState<'ALL' | 'VEG' | 'NON-VEG'>('ALL');
   const [selectedDish, setSelectedDish] = useState<ApiMenuItem | null>(null);
@@ -231,6 +263,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
   const showLargerLogo = uniqueGroups.length <= 1;
 
   const logoUrl = menu?.outlet?.brand?.logo;
+  const hasOffers = offers.length > 0;
 
   // Initialize activeGroup to first group if not set
   useEffect(() => {
@@ -258,7 +291,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
       .filter(item => item.recommended);
   }, [groupFilteredCategories]);
 
-  const hasRecommended = recommendedItems.length > 0;
+  const hasRecommended = recommendedItems.length > 0 || hasOffers;
 
   // Initialize activeParentId when parent categories load
   useEffect(() => {
@@ -537,10 +570,11 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
         {/* Parent category tabs */}
         <div className="mt-3">
           <div className="flex flex-row items-start gap-[28px] overflow-x-auto [scrollbar-width:none]">
-            {/* Offers for you tab — only if there are recommended items */}
+            {/* Offers for you tab */}
             {hasRecommended && (
               <div className="flex flex-col items-center gap-[4px] shrink-0">
                 <div className="flex flex-row items-center gap-[3px]">
+                  <span className="text-brand-accent text-[14px]">&#10022;</span>
                   <button
                     ref={(el) => { if (el) tabRefs.current.set('offers', el); else tabRefs.current.delete('offers'); }}
                     onClick={() => handleParentTabChange(null)}
@@ -632,12 +666,17 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
           )}
         </div>
 
-        {/* ═══════ Content Area ═══════ */}
+        {/* Content Area */}
 
         {/* "Offers for you" tab content */}
         {activeParentId === null && hasRecommended && (
-          <div className="flex flex-col w-full">
-            {filteredRecommended.length === 0 ? (
+          <div className="flex flex-col gap-[10px] w-full">
+            {/* Actual offers from API */}
+            {hasOffers && offers.map((offer) => (
+              <OfferBannerCard key={offer.id} offer={offer} />
+            ))}
+
+            {filteredRecommended.length === 0 && !hasOffers ? (
               <div className="text-center text-brand-muted py-10 font-inter text-[14px]">
                 No {filterType.toLowerCase()} recommended items available
               </div>
@@ -652,19 +691,26 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
         {/* Parent category content — child sections with continuous scroll */}
         {activeParentId !== null && activeChildCategories.length > 0 && (
           <div className="flex flex-col gap-1 w-full">
-            {activeChildCategories.map((child) => (
-              <ChildCategorySection
-                key={child.id}
-                category={child}
-                filterType={filterType}
-                searchQuery={searchQuery}
-                filterCriteria={filterCriteria}
-                onItemClick={setSelectedDish}
-                sectionRef={(el) => {
-                  if (el) sectionRefs.current.set(child.id, el);
-                  else sectionRefs.current.delete(child.id);
-                }}
-              />
+            {activeChildCategories.map((child, idx) => (
+              <React.Fragment key={child.id}>
+                <ChildCategorySection
+                  category={child}
+                  filterType={filterType}
+                  searchQuery={searchQuery}
+                  filterCriteria={filterCriteria}
+                  onItemClick={setSelectedDish}
+                  sectionRef={(el) => {
+                    if (el) sectionRefs.current.set(child.id, el);
+                    else sectionRefs.current.delete(child.id);
+                  }}
+                />
+                {/* Insert offer card after every 2nd category */}
+                {offers.length > 0 && (idx + 1) % 2 === 0 && idx < activeChildCategories.length - 1 && (
+                  <div className="mb-6">
+                    <OfferBannerCard offer={offers[Math.floor(idx / 2) % offers.length]} />
+                  </div>
+                )}
+              </React.Fragment>
             ))}
           </div>
         )}

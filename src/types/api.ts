@@ -62,11 +62,24 @@ export interface Outlet {
   brand: OutletBrand;
 }
 
+export interface ApiOffer {
+  id: string;
+  title: string;
+  description?: string | null;
+  image_url?: string | null;
+  discount?: string | null;
+  is_general: boolean;
+  group?: string | null;
+  category?: string | null;
+  applicable_items: string[];
+}
+
 export interface MenuData {
   accessPointId: string;
   outlet: Outlet;
   template: string;
   categories: ApiCategory[];
+  offers?: ApiOffer[];
 }
 
 // Special states returned when the menu isn't ready

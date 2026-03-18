@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import type { MenuData, ApiCategory, ApiMenuItem } from '../types/api';
+import type { MenuData, ApiCategory, ApiMenuItem, ApiOffer } from '../types/api';
 import { fetchMenuBySlug, MenuFetchError, type MenuErrorCode } from '../services/api';
 
 // ── Refresh interval (1 minute) ─────────────────────────────────────────────
@@ -41,6 +41,7 @@ interface MenuContextValue {
   allItems: ApiMenuItem[];
   parentCategories: ApiCategory[];
   getChildCategories: (parentId: string) => ApiCategory[];
+  offers: ApiOffer[];
 }
 
 const MenuContext = createContext<MenuContextValue | null>(null);
@@ -128,6 +129,7 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
 
   const categories = menu?.categories ?? [];
   const allItems = categories.flatMap((cat) => cat.items);
+  const offers = menu?.offers ?? [];
 
   const parentCategories = useMemo(() =>
     categories.filter(cat => !cat.parentId),
@@ -151,6 +153,7 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
         allItems,
         parentCategories,
         getChildCategories,
+        offers,
       }}
     >
       {children}
