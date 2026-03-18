@@ -78,6 +78,11 @@ function isItemFilteredOut(item: ApiMenuItem, criteria: FilterCriteria | null): 
   return false;
 }
 
+// ── Title case helper ────────────────────────────────────────────────────────
+function toTitleCase(str: string): string {
+  return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+}
+
 // ── Dish card — text LEFT, image RIGHT ──────────────────────────────────────
 function DishCard({ dish, onClick, dimmed = false, showVegDot = true }: { dish: ApiMenuItem; onClick: () => void; dimmed?: boolean; showVegDot?: boolean }) {
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -107,7 +112,7 @@ function DishCard({ dish, onClick, dimmed = false, showVegDot = true }: { dish: 
 
         {/* Name */}
         <span className="font-playfair font-semibold text-[16px] leading-tight text-white">
-          {dish.name}
+          {toTitleCase(dish.name)}
         </span>
 
         {/* Price + prep time row */}
@@ -233,7 +238,7 @@ function ChildCategorySection({
       {/* Section header */}
       <div className="flex items-center gap-[8px] px-1 py-[10px] mb-1">
         <span className="font-playfair font-semibold text-[16px] leading-[20px] text-brand-brown">
-          {category.name}
+          {toTitleCase(category.name)}
         </span>
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="opacity-40 mt-[1px]">
           <path d="M3 4.5L6 7.5L9 4.5" stroke="#7C3F20" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -782,7 +787,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
                   return (
                     <div key={`ph-${section.parentId}`} data-parent-header={section.parentId} className="mt-4 mb-2 first:mt-0">
                       <h3 className="font-playfair font-semibold text-[18px] text-brand-brown tracking-wide">
-                        {section.parentName}
+                        {toTitleCase(section.parentName)}
                       </h3>
                     </div>
                   );
