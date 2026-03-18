@@ -88,7 +88,7 @@ function DishCard({ dish, onClick, dimmed = false, showVegDot = true }: { dish: 
     <div
       onClick={dish.inStock ? onClick : undefined}
       className={[
-        'flex flex-row items-start gap-3 w-full py-4 border-b border-brand-divider',
+        'flex flex-row items-start gap-3 w-full py-3 border-b border-white/8',
         !dish.inStock ? 'opacity-50' : dimmed ? 'opacity-40' : '',
         dish.inStock ? 'cursor-pointer' : '',
       ].join(' ')}
@@ -106,29 +106,36 @@ function DishCard({ dish, onClick, dimmed = false, showVegDot = true }: { dish: 
         )}
 
         {/* Name */}
-        <span className="font-playfair font-semibold text-[16px] leading-tight text-brand-brown">
+        <span className="font-playfair font-semibold text-[16px] leading-tight text-white">
           {dish.name}
         </span>
 
         {/* Price + prep time row */}
         <div className="flex items-center gap-1.5">
           {showVegDot && !(dish.recommended && dish.inStock) && <VegDot isVeg={dish.veg} size={10} />}
-          <span className="font-roboto font-medium text-[13px] text-brand-brown">
+          <span className="font-roboto font-medium text-[13px] text-white">
             {'\u20B9'}{dish.price}
           </span>
           {dish.prepTime && (
             <>
-              <span className="text-brand-muted text-[10px]">&bull;</span>
-              <span className="font-inter text-[11px] text-brand-muted">{dish.prepTime} mins</span>
+              <span className="text-white/40 text-[10px]">&bull;</span>
+              <span className="font-inter text-[11px] text-white/55">{dish.prepTime} mins</span>
             </>
           )}
         </div>
 
         {/* Description */}
         {dish.description?.trim() && (
-          <p className="font-inter font-normal text-[11px] leading-4 text-brand-muted line-clamp-2 mt-0.5">
+          <p className="font-inter font-normal text-[11px] leading-4 text-white/55 line-clamp-2 mt-0.5">
             {dish.description}
           </p>
+        )}
+
+        {/* Label */}
+        {dish.label && dish.inStock && (
+          <span className="inline-flex self-start font-inter font-medium text-[10px] text-brand-accent bg-brand-accent/15 px-2 py-0.5 rounded mt-1">
+            {dish.label}
+          </span>
         )}
 
         {!dish.inStock && (
@@ -140,7 +147,7 @@ function DishCard({ dish, onClick, dimmed = false, showVegDot = true }: { dish: 
 
       {/* Right: dish image — only if available */}
       {imgSrc && !imgError && (
-        <div className="shrink-0 w-[120px] h-[120px] rounded-md overflow-hidden bg-brand-divider">
+        <div className="shrink-0 w-[130px] h-[130px] rounded-lg overflow-hidden bg-white/10">
           <img
             src={imgSrc}
             alt={dish.name}
