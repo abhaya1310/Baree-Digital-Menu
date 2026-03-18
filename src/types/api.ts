@@ -35,6 +35,9 @@ export interface ApiMenuItem {
   addonGroups: AddonGroup[];
   variantGroups: VariantGroup[];
   filters: Filter[];
+  allergies?: string[];
+  ingredients?: string[];
+  label?: string | null;
   available: true;
 }
 
