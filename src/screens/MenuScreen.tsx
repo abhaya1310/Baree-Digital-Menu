@@ -392,6 +392,9 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
   useEffect(() => {
     if (activeParentId === null) return;
 
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (isUserTabClick.current) return;
@@ -412,7 +415,8 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
         }
       },
       {
-        rootMargin: '-100px 0px -60% 0px',
+        root: scrollContainer,
+        rootMargin: '-20px 0px -60% 0px',
         threshold: 0,
       }
     );
@@ -472,8 +476,10 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
     return names;
   }, [groupFilteredParentCategories, getChildCategories, filterType, hasRecommended]);
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
   return (
-    <div className="min-h-screen bg-brand-cream text-brand-brown pb-[100px] relative">
+    <div className="h-screen flex flex-col bg-brand-cream text-brand-brown relative max-w-[393px] mx-auto">
       <DishDetailModal
         isOpen={!!selectedDish}
         onClose={() => setSelectedDish(null)}
@@ -527,7 +533,8 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
         items={allItems}
       />
 
-      <div className="max-w-[393px] mx-auto relative px-[15px] box-border">
+      {/* FIXED HEADER — shrink-0, no scroll */}
+      <div className="shrink-0 px-[15px] box-border">
 
         {/* Logo */}
         <div className="flex justify-center pt-[30px] pb-[10px]">
@@ -640,11 +647,11 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
             })}
           </div>
           {/* Divider */}
-          <div className="h-px bg-brand-divider mt-[2px] mb-4" />
+          <div className="h-px bg-brand-divider mt-[2px]" />
         </div>
 
         {/* Search bar */}
-        <div className="box-border w-full h-[35px] bg-brand-white border-[0.6px] border-brand-border shadow-[1px_2px_2px_rgba(255,255,255,0.3)] rounded-[50px] mb-5 flex flex-row justify-between items-center px-[14px] transition-all duration-200">
+        <div className="box-border w-full h-[35px] bg-brand-white border-[0.6px] border-brand-border shadow-[1px_2px_2px_rgba(255,255,255,0.3)] rounded-[50px] my-3 flex flex-row justify-between items-center px-[14px] transition-all duration-200">
           <div
             className="flex flex-row items-center gap-[10px] cursor-pointer flex-1 transition-opacity duration-150 active:opacity-70"
             onClick={() => setIsSearchActive(true)}
@@ -675,8 +682,10 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
             </button>
           )}
         </div>
+      </div>
 
-        {/* Content Area */}
+      {/* SCROLLABLE CONTENT — flex-1, overflow-y-auto */}
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-[15px] pb-[100px]">
 
         {/* "Offers for you" tab content */}
         {activeParentId === null && hasRecommended && (
