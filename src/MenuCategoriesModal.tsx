@@ -9,6 +9,10 @@ interface MenuCategoriesModalProps {
   availableCategories?: string[];
 }
 
+function toTitleCase(str: string): string {
+  return str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+}
+
 export default function MenuCategoriesModal({ isOpen, onClose, onCategorySelect, type = 'food', availableCategories }: MenuCategoriesModalProps) {
   const { categories } = useMenu();
 
@@ -37,21 +41,21 @@ export default function MenuCategoriesModal({ isOpen, onClose, onCategorySelect,
         onClick={e => e.stopPropagation()}
       >
         {/* Title */}
-        <h2 className="font-playfair font-semibold text-[32px] leading-[40px] text-black mt-[45px] mb-[35px] text-center w-full">
+        <h2 className="font-playfair font-semibold text-[20px] leading-[28px] text-black mt-[20px] mb-4 text-center w-full">
           {title}
         </h2>
 
         {/* Scrollable Categories List - 2 Columns */}
         <div className="w-full px-[40px] overflow-y-auto [scrollbar-width:none]">
-          <div className="grid grid-cols-2 gap-y-[35px] gap-x-[10px]">
+          <div className="grid grid-cols-2 gap-y-3 gap-x-[10px]">
             {displayCategories.map(cat => (
               <div
                 key={cat.name}
                 onClick={() => onCategorySelect?.(cat.name)}
-                className="cursor-pointer hover:opacity-70 transition-opacity"
+                className="cursor-pointer hover:opacity-70 transition-opacity py-3"
               >
                 <span className="font-playfair font-medium text-[20px] leading-[24px] text-[#4A4A4A]">
-                  {cat.name}
+                  {toTitleCase(cat.name)}
                 </span>
               </div>
             ))}
@@ -59,12 +63,12 @@ export default function MenuCategoriesModal({ isOpen, onClose, onCategorySelect,
         </div>
 
         {/* Circular Close Button at bottom */}
-        <div className="mt-[40px] flex justify-center w-full">
+        <div className="py-3 flex justify-center w-full">
           <button
             onClick={onClose}
-            className="w-[60px] h-[60px] bg-white rounded-full border border-gray-100 shadow-[0_4px_15px_rgba(0,0,0,0.08)] flex items-center justify-center cursor-pointer transition-transform hover:scale-105"
+            className="w-[32px] h-[32px] bg-white rounded-full border border-gray-100 shadow-[0_4px_15px_rgba(0,0,0,0.08)] flex items-center justify-center cursor-pointer transition-transform hover:scale-105"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555555" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#555555" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
