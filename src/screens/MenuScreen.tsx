@@ -16,19 +16,9 @@ interface MenuScreenProps {
   uniqueGroups: string[];
 }
 
-const FALLBACK_FOOD_IMAGE = 'https://images.pexels.com/photos/1639562/pexels-photo-1639562.jpeg?auto=compress&cs=tinysrgb&w=400';
-
-function getItemImage(item: ApiMenuItem): string {
-  return item.thumbnail || item.image || FALLBACK_FOOD_IMAGE;
+function getItemImage(item: ApiMenuItem): string | null {
+  return item.image || item.thumbnail || null;
 }
-
-const GROUP_IMAGES: Record<string, string> = {
-  Food: 'https://images.pexels.com/photos/1639562/pexels-photo-1639562.jpeg?auto=compress&cs=tinysrgb&w=200',
-  Drinks: 'https://images.pexels.com/photos/338713/pexels-photo-338713.jpeg?auto=compress&cs=tinysrgb&w=200',
-  Tobacco: 'https://images.pexels.com/photos/4969832/pexels-photo-4969832.jpeg?auto=compress&cs=tinysrgb&w=200',
-  Desserts: 'https://images.pexels.com/photos/291528/pexels-photo-291528.jpeg?auto=compress&cs=tinysrgb&w=200',
-};
-const DEFAULT_GROUP_IMAGE = 'https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?auto=compress&cs=tinysrgb&w=200';
 
 // ── Filter matching helper ───────────────────────────────────────────────────
 function isItemFilteredOut(item: ApiMenuItem, criteria: FilterCriteria | null): boolean {
@@ -132,9 +122,9 @@ function DishCard({ dish, onClick, dimmed = false }: { dish: ApiMenuItem; onClic
         )}
       </div>
 
-      {/* Right: dish image */}
-      <div className="shrink-0 w-[120px] h-[120px] rounded-md overflow-hidden bg-brand-divider">
-        {imgSrc && !imgError ? (
+      {/* Right: dish image — only if available */}
+      {imgSrc && !imgError && (
+        <div className="shrink-0 w-[120px] h-[120px] rounded-md overflow-hidden bg-brand-divider">
           <img
             src={imgSrc}
             alt={dish.name}
@@ -144,10 +134,8 @@ function DishCard({ dish, onClick, dimmed = false }: { dish: ApiMenuItem; onClic
             onError={() => setImgError(true)}
             className={`w-full h-full object-cover transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
           />
-        ) : (
-          <div className="w-full h-full bg-brand-divider" />
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -557,7 +545,6 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
               <CategoryCard
                 key={group}
                 label={group}
-                img={GROUP_IMAGES[group] || DEFAULT_GROUP_IMAGE}
                 active={activeGroup === group}
                 onClick={() => onGroupChange(group)}
               />

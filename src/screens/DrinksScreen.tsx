@@ -34,17 +34,14 @@ export default function DrinksScreen({
         <div className="flex flex-row items-center gap-[25px] w-[290px] h-[100px] mx-auto mb-5">
           <CategoryCard
             label="Food"
-            img="https://images.pexels.com/photos/1639562/pexels-photo-1639562.jpeg?auto=compress&cs=tinysrgb&w=200"
             onClick={onNavigateToFood}
           />
           <CategoryCard
             label="Drinks"
-            img="https://images.pexels.com/photos/338713/pexels-photo-338713.jpeg?auto=compress&cs=tinysrgb&w=200"
             active
           />
           <CategoryCard
             label="Tobacco"
-            img="https://images.pexels.com/photos/4969832/pexels-photo-4969832.jpeg?auto=compress&cs=tinysrgb&w=200"
             onClick={onNavigateToTobacco}
           />
         </div>

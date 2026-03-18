@@ -2,14 +2,14 @@ import React from 'react';
 
 interface CategoryCardProps {
   label: string;
-  img: string;
+  img?: string;
   active?: boolean;
   onClick?: () => void;
 }
 
 /**
- * "Food / Drinks / Tobacco" category pill — equal-width cards, active card gets amber gradient.
- * Inactive cards use a lighter blue-gray with a subtle border (matches image 2 design).
+ * "Food / Drinks / Tobacco" category pill — equal-width cards, active card gets accent.
+ * Inactive cards use a lighter style with a subtle border.
  */
 const CategoryCard: React.FC<CategoryCardProps> = ({ label, img, active = false, onClick }) => {
   return (
@@ -24,11 +24,17 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ label, img, active = false,
         onClick ? 'cursor-pointer' : 'cursor-default',
       ].join(' ')}
     >
-      <img
-        src={img}
-        alt={label}
-        className="w-[50px] h-[50px] rounded-full object-cover shadow-[1px_2px_4px_rgba(0,0,0,0.2)]"
-      />
+      {img ? (
+        <img
+          src={img}
+          alt={label}
+          className="w-[50px] h-[50px] rounded-full object-cover shadow-[1px_2px_4px_rgba(0,0,0,0.2)]"
+        />
+      ) : (
+        <div className={`w-[50px] h-[50px] rounded-full flex items-center justify-center shadow-[1px_2px_4px_rgba(0,0,0,0.2)] ${active ? 'bg-white/20' : 'bg-brand-border/30'}`}>
+          <span className={`font-inter font-semibold text-[16px] ${active ? 'text-white/70' : 'text-brand-brown/50'}`}>{label.charAt(0)}</span>
+        </div>
+      )}
       <span
         className={[
           'font-inter text-[14px] leading-[17px] text-center w-full',
