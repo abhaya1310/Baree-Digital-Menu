@@ -303,7 +303,17 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
   const handleParentTabChange = useCallback((parentId: string | null) => {
     isUserTabClick.current = true;
     setActiveParentId(parentId);
-    setTimeout(() => { isUserTabClick.current = false; }, 500);
+
+    if (parentId) {
+      requestAnimationFrame(() => {
+        const parentHeader = document.querySelector(`[data-parent-header="${parentId}"]`);
+        if (parentHeader) {
+          parentHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    }
+
+    setTimeout(() => { isUserTabClick.current = false; }, 800);
   }, []);
 
   // Reset parent tab when group changes
@@ -336,29 +346,63 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
     }
   }, [searchQuery]);
 
-  // Get child categories for the active parent
-  const activeChildCategories = useMemo(() => {
-    if (!activeParentId) return [];
-    const children = getChildCategories(activeParentId);
-    return children.filter(cat => {
-      let items = cat.items;
-      if (filterType === 'VEG') items = items.filter(i => i.veg);
-      if (filterType === 'NON-VEG') items = items.filter(i => !i.veg);
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        items = items.filter(i =>
-          i.name.toLowerCase().includes(q) ||
-          i.description?.toLowerCase().includes(q) ||
-          cat.name.toLowerCase().includes(q)
-        );
+  // Build a flat list of ALL sections across ALL parents for continuous scroll
+  const allSections = useMemo(() => {
+    if (activeParentId === null) return []; // Offers tab — handled separately
+
+    const sections: Array<{
+      type: 'parent-header' | 'child-category' | 'parent-direct';
+      parentId: string;
+      parentName: string;
+      category?: ApiCategory;
+    }> = [];
+
+    for (const parent of groupFilteredParentCategories) {
+      const children = getChildCategories(parent.id).filter(cat => {
+        let items = cat.items;
+        if (filterType === 'VEG') items = items.filter(i => i.veg);
+        if (filterType === 'NON-VEG') items = items.filter(i => !i.veg);
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          items = items.filter(i =>
+            i.name.toLowerCase().includes(q) ||
+            i.description?.toLowerCase().includes(q) ||
+            cat.name.toLowerCase().includes(q)
+          );
+        }
+        return items.length > 0;
+      });
+
+      if (children.length > 0) {
+        sections.push({ type: 'parent-header', parentId: parent.id, parentName: parent.name });
+        for (const child of children) {
+          sections.push({ type: 'child-category', parentId: parent.id, parentName: parent.name, category: child });
+        }
+      } else if (parent.items.length > 0) {
+        let items = parent.items;
+        if (filterType === 'VEG') items = items.filter(i => i.veg);
+        if (filterType === 'NON-VEG') items = items.filter(i => !i.veg);
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          items = items.filter(i =>
+            i.name.toLowerCase().includes(q) ||
+            i.description?.toLowerCase().includes(q) ||
+            parent.name.toLowerCase().includes(q)
+          );
+        }
+        if (items.length > 0) {
+          sections.push({ type: 'parent-header', parentId: parent.id, parentName: parent.name });
+          sections.push({ type: 'parent-direct', parentId: parent.id, parentName: parent.name, category: parent });
+        }
       }
-      return items.length > 0;
-    });
-  }, [activeParentId, getChildCategories, filterType, searchQuery]);
+    }
+
+    return sections;
+  }, [activeParentId, groupFilteredParentCategories, getChildCategories, filterType, searchQuery]);
 
   // IntersectionObserver to track which section is visible and update parent tab
   useEffect(() => {
-    if (!activeParentId) return;
+    if (activeParentId === null) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -390,7 +434,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
     });
 
     return () => observer.disconnect();
-  }, [activeChildCategories, activeParentId, categories]);
+  }, [allSections, activeParentId, categories]);
 
   // Auto-scroll the parent tab bar to keep the active tab visible
   useEffect(() => {
@@ -399,27 +443,6 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
       activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     }
   }, [activeParentId]);
-
-  // If the parent has no children but has items directly
-  const parentDirectItems = useMemo(() => {
-    if (!activeParentId) return [];
-    const children = getChildCategories(activeParentId);
-    if (children.length > 0) return [];
-    const parentCat = groupFilteredCategories.find(c => c.id === activeParentId);
-    if (!parentCat) return [];
-    let items = parentCat.items;
-    if (filterType === 'VEG') items = items.filter(i => i.veg);
-    if (filterType === 'NON-VEG') items = items.filter(i => !i.veg);
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      items = items.filter(i =>
-        i.name.toLowerCase().includes(q) ||
-        i.description?.toLowerCase().includes(q) ||
-        parentCat.name.toLowerCase().includes(q)
-      );
-    }
-    return items;
-  }, [activeParentId, getChildCategories, groupFilteredCategories, filterType, searchQuery]);
 
   // Filtered recommended items for "Offers for you" tab
   const filteredRecommended = useMemo(() => {
@@ -688,44 +711,75 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
           </div>
         )}
 
-        {/* Parent category content — child sections with continuous scroll */}
-        {activeParentId !== null && activeChildCategories.length > 0 && (
+        {/* All parent categories — continuous scroll */}
+        {activeParentId !== null && allSections.length > 0 && (
           <div className="flex flex-col gap-1 w-full">
-            {activeChildCategories.map((child, idx) => (
-              <React.Fragment key={child.id}>
-                <ChildCategorySection
-                  category={child}
-                  filterType={filterType}
-                  searchQuery={searchQuery}
-                  filterCriteria={filterCriteria}
-                  onItemClick={setSelectedDish}
-                  sectionRef={(el) => {
-                    if (el) sectionRefs.current.set(child.id, el);
-                    else sectionRefs.current.delete(child.id);
-                  }}
-                />
-                {/* Insert offer card after every 2nd category */}
-                {offers.length > 0 && (idx + 1) % 2 === 0 && idx < activeChildCategories.length - 1 && (
-                  <div className="mb-6">
-                    <OfferBannerCard offer={offers[Math.floor(idx / 2) % offers.length]} />
-                  </div>
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        )}
+            {(() => {
+              let childCount = 0;
+              return allSections.map((section, idx) => {
+                if (section.type === 'parent-header') {
+                  return (
+                    <div key={`ph-${section.parentId}`} data-parent-header={section.parentId} className="mt-4 mb-2 first:mt-0">
+                      <h3 className="font-playfair font-semibold text-[18px] text-brand-brown tracking-wide">
+                        {section.parentName}
+                      </h3>
+                    </div>
+                  );
+                }
 
-        {/* Parent has direct items (no children) */}
-        {activeParentId !== null && activeChildCategories.length === 0 && parentDirectItems.length > 0 && (
-          <div className="flex flex-col w-full">
-            {parentDirectItems.map((dish) => (
-              <DishCard key={dish.id} dish={dish} onClick={() => setSelectedDish(dish)} dimmed={isItemFilteredOut(dish, filterCriteria)} />
-            ))}
+                if (section.type === 'child-category' && section.category) {
+                  childCount++;
+                  const currentChildCount = childCount;
+                  return (
+                    <React.Fragment key={section.category.id}>
+                      <ChildCategorySection
+                        category={section.category}
+                        filterType={filterType}
+                        searchQuery={searchQuery}
+                        filterCriteria={filterCriteria}
+                        onItemClick={setSelectedDish}
+                        sectionRef={(el) => {
+                          if (el) sectionRefs.current.set(section.category!.id, el);
+                          else sectionRefs.current.delete(section.category!.id);
+                        }}
+                      />
+                      {/* Insert offer card after every 2nd child category */}
+                      {offers.length > 0 && currentChildCount % 2 === 0 && idx < allSections.length - 1 && (
+                        <div className="mb-6">
+                          <OfferBannerCard offer={offers[Math.floor((currentChildCount - 1) / 2) % offers.length]} />
+                        </div>
+                      )}
+                    </React.Fragment>
+                  );
+                }
+
+                if (section.type === 'parent-direct' && section.category) {
+                  const items = filterType === 'VEG' ? section.category.items.filter(i => i.veg)
+                    : filterType === 'NON-VEG' ? section.category.items.filter(i => !i.veg)
+                    : section.category.items;
+                  return (
+                    <div key={`pd-${section.parentId}`} ref={(el) => {
+                      if (el) sectionRefs.current.set(section.parentId, el);
+                      else sectionRefs.current.delete(section.parentId);
+                    }} data-category-id={section.parentId} className="mb-6">
+                      <div className="flex flex-col w-full">
+                        {items.map((dish) => (
+                          <DishCard key={dish.id} dish={dish}
+                            dimmed={isItemFilteredOut(dish, filterCriteria)} onClick={() => setSelectedDish(dish)} />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+
+                return null;
+              });
+            })()}
           </div>
         )}
 
         {/* Empty state when parent selected but no items */}
-        {activeParentId !== null && activeChildCategories.length === 0 && parentDirectItems.length === 0 && (
+        {activeParentId !== null && allSections.length === 0 && (
           <div className="text-center text-brand-muted py-10 font-inter text-[14px]">
             No {filterType.toLowerCase()} items available in this category
           </div>
