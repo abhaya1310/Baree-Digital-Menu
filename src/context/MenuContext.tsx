@@ -59,6 +59,7 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasTrackedView = useRef(false);
 
   // silent=true: don't show loading spinner or clear current error state (used for retries + background refresh)
   const fetchMenu = useCallback(async (silent = false) => {
@@ -80,6 +81,21 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
       setMenu(data);
       setErrorCode(null);
       setErrorMessage(null);
+
+      // Track view (fire-and-forget, only on initial load)
+      if (!hasTrackedView.current && data.accessPointId) {
+        hasTrackedView.current = true;
+        const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+        fetch(`${baseUrl}/public/track/view`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            accessPointId: data.accessPointId,
+            outletId: data.outlet.id,
+            brandId: data.outlet.brand.id,
+          }),
+        }).catch(() => {});
+      }
 
       // Set document title to brand name
       if (data.outlet?.brand?.name) {
