@@ -868,11 +868,12 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
           </div>
         )}
 
-        {/* CSAT Footer */}
-        <div className="flex flex-col items-center justify-center py-8 mt-6 border-t border-[rgba(255,255,255,0.06)]">
-          <img src="https://admin.csatcloud.com/public-assets/csat_logo.png" alt="CSAT" className="h-[24px] object-contain opacity-30 mb-2" />
-          <span className="font-inter text-[10px] text-[rgba(255,255,255,0.3)]">Powered by CSAT DigiMenu</span>
-        </div>
+      </div>
+
+      {/* CSAT Footer — fixed at bottom */}
+      <div className="shrink-0 flex items-center justify-center py-2 bg-brand-cream">
+        <img src="https://admin.csatcloud.com/public-assets/csat_logo.png" alt="CSAT" className="h-[16px] object-contain opacity-30 mr-2" />
+        <span className="font-inter text-[9px] text-brand-muted">Powered by CSAT DigiMenu</span>
       </div>
 
       <MenuFab onClick={() => setIsMenuModalOpen(true)} />
