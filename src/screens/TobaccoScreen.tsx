@@ -14,7 +14,7 @@ export default function TobaccoScreen({ onNavigateToSpecials, onNavigateToFood, 
   const logoUrl = menu?.outlet?.brand?.logo;
 
   return (
-    <div className="min-h-screen bg-brand-cream text-brand-brown pb-[100px] relative">
+    <div className="min-h-screen bg-brand-cream text-brand-brown pb-[100px] relative max-w-[393px] mx-auto">
       {/* Header */}
       <div className="max-w-[393px] mx-auto relative px-[15px] box-border">
         {/* Logo */}
