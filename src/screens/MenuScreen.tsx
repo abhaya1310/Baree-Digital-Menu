@@ -84,7 +84,7 @@ function toTitleCase(str: string): string {
 }
 
 // ── Dish card — text LEFT, image RIGHT ──────────────────────────────────────
-function DishCard({ dish, onClick, dimmed = false, showVegDot = true }: { dish: ApiMenuItem; onClick: () => void; dimmed?: boolean; showVegDot?: boolean }) {
+function DishCard({ dish, onClick, dimmed = false, showVegDot = true, placeholderImage }: { dish: ApiMenuItem; onClick: () => void; dimmed?: boolean; showVegDot?: boolean; placeholderImage?: string }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
   const imgSrc = getItemImage(dish);
@@ -150,20 +150,24 @@ function DishCard({ dish, onClick, dimmed = false, showVegDot = true }: { dish: 
         )}
       </div>
 
-      {/* Right: dish image — only if available */}
-      {imgSrc && !imgError && (
-        <div className="shrink-0 w-[130px] h-[130px] rounded-lg overflow-hidden bg-white/10">
-          <img
-            src={imgSrc}
-            alt={dish.name}
-            loading="lazy"
-            decoding="async"
-            onLoad={() => setImgLoaded(true)}
-            onError={() => setImgError(true)}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
-          />
+      {/* Right: dish image */}
+      {(imgSrc && !imgError) || placeholderImage ? (
+        <div className="w-[130px] h-[130px] shrink-0 rounded-lg overflow-hidden flex items-center justify-center bg-[rgba(124,63,32,0.05)]">
+          {imgSrc && !imgError ? (
+            <img
+              src={imgSrc}
+              alt={dish.name}
+              loading="lazy"
+              decoding="async"
+              onLoad={() => setImgLoaded(true)}
+              onError={() => setImgError(true)}
+              className={`w-full h-full object-cover transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+            />
+          ) : placeholderImage ? (
+            <img src={placeholderImage} alt="" className="w-[50px] h-[50px] object-contain opacity-15" />
+          ) : null}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -205,6 +209,7 @@ function ChildCategorySection({
   onItemClick,
   sectionRef,
   showVegDot = true,
+  placeholderImage,
 }: {
   category: ApiCategory;
   filterType: string;
@@ -213,6 +218,7 @@ function ChildCategorySection({
   onItemClick: (item: ApiMenuItem) => void;
   sectionRef?: (el: HTMLDivElement | null) => void;
   showVegDot?: boolean;
+  placeholderImage?: string;
 }) {
   const items = useMemo(() => {
     let filtered = category.items;
@@ -251,7 +257,7 @@ function ChildCategorySection({
       {/* Items list */}
       <div className="flex flex-col w-full">
         {items.map((dish) => (
-          <DishCard key={dish.id} dish={dish} onClick={() => onItemClick(dish)} dimmed={isItemFilteredOut(dish, filterCriteria)} showVegDot={showVegDot} />
+          <DishCard key={dish.id} dish={dish} onClick={() => onItemClick(dish)} dimmed={isItemFilteredOut(dish, filterCriteria)} showVegDot={showVegDot} placeholderImage={placeholderImage} />
         ))}
       </div>
     </div>
@@ -260,7 +266,7 @@ function ChildCategorySection({
 
 // ── Main ─────────────────────────────────────────────────────────────────────
 export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupChange, uniqueGroups }: MenuScreenProps) {
-  const { menu, categories, allItems, parentCategories, getChildCategories, offers, groupImages } = useMenu();
+  const { menu, categories, allItems, parentCategories, getChildCategories, offers, groupImages, placeholderImage } = useMenu();
 
   const [filterType, setFilterType] = useState<string>('ALL');
   const [selectedDish, setSelectedDish] = useState<ApiMenuItem | null>(null);
@@ -773,7 +779,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
               </div>
             ) : (
               filteredRecommended.map((dish) => (
-                <DishCard key={dish.id} dish={dish} onClick={() => setSelectedDish(dish)} dimmed={isItemFilteredOut(dish, filterCriteria)} showVegDot={showVegDot} />
+                <DishCard key={dish.id} dish={dish} onClick={() => setSelectedDish(dish)} dimmed={isItemFilteredOut(dish, filterCriteria)} showVegDot={showVegDot} placeholderImage={placeholderImage} />
               ))
             )}
           </div>
@@ -807,6 +813,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
                         filterCriteria={filterCriteria}
                         onItemClick={setSelectedDish}
                         showVegDot={showVegDot}
+                        placeholderImage={placeholderImage}
                         sectionRef={(el) => {
                           if (el) sectionRefs.current.set(section.category!.id, el);
                           else sectionRefs.current.delete(section.category!.id);
@@ -836,7 +843,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
                       <div className="flex flex-col w-full">
                         {items.map((dish) => (
                           <DishCard key={dish.id} dish={dish}
-                            dimmed={isItemFilteredOut(dish, filterCriteria)} onClick={() => setSelectedDish(dish)} showVegDot={showVegDot} />
+                            dimmed={isItemFilteredOut(dish, filterCriteria)} onClick={() => setSelectedDish(dish)} showVegDot={showVegDot} placeholderImage={placeholderImage} />
                         ))}
                       </div>
                     </div>

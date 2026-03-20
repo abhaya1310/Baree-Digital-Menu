@@ -81,6 +81,7 @@ export interface MenuData {
   accessPointId: string;
   outlet: Outlet;
   template: string;
+  placeholderImage?: string;
   groupImages?: Record<string, string>;
   categories: ApiCategory[];
   offers?: ApiOffer[];
