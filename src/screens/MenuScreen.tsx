@@ -439,7 +439,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
     return sections;
   }, [activeParentId, groupFilteredParentCategories, getChildCategories, filterType, searchQuery]);
 
-  // IntersectionObserver to track which section is visible and update parent tab
+  // IntersectionObserver to track which parent header is visible and update parent tab
   useEffect(() => {
     if (activeParentId === null) return;
 
@@ -449,35 +449,34 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
     const observer = new IntersectionObserver(
       (entries) => {
         if (isUserTabClick.current) return;
+        let topEntry: IntersectionObserverEntry | null = null;
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            const categoryId = entry.target.getAttribute('data-category-id');
-            if (categoryId) {
-              const cat = categories.find(c => c.id === categoryId);
-              if (cat) {
-                const parentId = cat.parentId || cat.id;
-                if (parentId !== activeParentId) {
-                  setActiveParentId(parentId);
-                }
-              }
+            if (!topEntry || entry.boundingClientRect.top < topEntry.boundingClientRect.top) {
+              topEntry = entry;
             }
-            break;
+          }
+        }
+        if (topEntry) {
+          const parentId = topEntry.target.getAttribute('data-parent-header');
+          if (parentId && parentId !== activeParentId) {
+            setActiveParentId(parentId);
           }
         }
       },
       {
         root: scrollContainer,
-        rootMargin: '-20px 0px -60% 0px',
+        rootMargin: '0px 0px -70% 0px',
         threshold: 0,
       }
     );
 
-    sectionRefs.current.forEach((el) => {
+    scrollContainer.querySelectorAll('[data-parent-header]').forEach((el) => {
       observer.observe(el);
     });
 
     return () => observer.disconnect();
-  }, [allSections, activeParentId, categories]);
+  }, [allSections, activeParentId]);
 
   // Auto-scroll the parent tab bar to keep the active tab visible
   useEffect(() => {
