@@ -85,7 +85,6 @@ function toTitleCase(str: string): string {
 
 // ── Dish card — text LEFT, image RIGHT ──────────────────────────────────────
 function DishCard({ dish, onClick, dimmed = false, showVegDot = true, placeholderImage }: { dish: ApiMenuItem; onClick: () => void; dimmed?: boolean; showVegDot?: boolean; placeholderImage?: string }) {
-  const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
   const imgSrc = getItemImage(dish);
 
@@ -157,11 +156,8 @@ function DishCard({ dish, onClick, dimmed = false, showVegDot = true, placeholde
             <img
               src={imgSrc}
               alt={dish.name}
-              loading="lazy"
-              decoding="async"
-              onLoad={() => setImgLoaded(true)}
               onError={() => setImgError(true)}
-              className={`w-full h-full object-cover transition-opacity duration-300 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+              className="w-full h-full object-cover"
             />
           ) : placeholderImage ? (
             <img src={placeholderImage} alt="" className="w-[50px] h-[50px] object-contain opacity-15" />
