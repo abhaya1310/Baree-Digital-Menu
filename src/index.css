@@ -5,4 +5,11 @@
 html, body {
   overscroll-behavior-y: none;
   background-color: #FAF7F2;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  max-width: 430px;
+  margin: 0 auto;
 }
