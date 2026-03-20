@@ -71,7 +71,7 @@ export default function PosSelectScreen() {
   if (loading) {
     return (
       <div
-        className="min-h-screen max-w-[393px] mx-auto flex items-center justify-center"
+        className="min-h-screen flex items-center justify-center"
         style={{ background: 'linear-gradient(180deg, #8B4513 0%, #A0522D 40%, #CD853F 100%)' }}
       >
         <div className="flex flex-col items-center gap-4">
@@ -86,7 +86,7 @@ export default function PosSelectScreen() {
   if (error || !data) {
     return (
       <div
-        className="min-h-screen max-w-[393px] mx-auto flex items-center justify-center px-6"
+        className="min-h-screen flex items-center justify-center px-6"
         style={{ background: 'linear-gradient(180deg, #8B4513 0%, #A0522D 40%, #CD853F 100%)' }}
       >
         <div className="text-center max-w-sm">
@@ -113,7 +113,7 @@ export default function PosSelectScreen() {
 
   return (
     <div
-      className="min-h-screen max-w-[393px] mx-auto flex flex-col items-center justify-center px-6"
+      className="min-h-screen flex flex-col items-center justify-center px-6"
       style={{ background: 'linear-gradient(180deg, #8B4513 0%, #A0522D 40%, #CD853F 100%)' }}
     >
       {/* Brand logo or name */}

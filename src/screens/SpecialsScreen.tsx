@@ -15,7 +15,7 @@ export default function SpecialsScreen({ onNavigateToMenu }: SpecialsScreenProps
   const recommendedItems = allItems.filter(item => item.recommended);
 
   return (
-    <div className="min-h-screen max-w-[393px] mx-auto bg-brand-cream text-brand-brown pb-[100px]">
+    <div className="min-h-screen bg-brand-cream text-brand-brown pb-[100px]">
       <div className="max-w-[390px] mx-auto">
 
         {/* Logo */}

@@ -539,7 +539,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="h-screen flex flex-col bg-brand-cream text-brand-brown relative max-w-[393px] mx-auto w-full">
+    <div className="h-screen flex flex-col bg-brand-cream text-brand-brown relative w-full">
       <DishDetailModal
         isOpen={!!selectedDish}
         onClose={() => setSelectedDish(null)}

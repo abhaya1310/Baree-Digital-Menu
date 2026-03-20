@@ -18,9 +18,9 @@ export default function DrinksScreen({
   const logoUrl = menu?.outlet?.brand?.logo;
 
   return (
-    <div className="min-h-screen max-w-[393px] mx-auto bg-brand-cream text-brand-brown pb-[100px] relative">
+    <div className="min-h-screen bg-brand-cream text-brand-brown pb-[100px] relative">
       {/* Header */}
-      <div className="max-w-[393px] mx-auto relative px-[15px] box-border">
+      <div className="relative px-[15px] box-border">
         {/* Logo */}
         <div className="flex justify-center pt-[29px] pb-[10px]">
           {logoUrl ? (
