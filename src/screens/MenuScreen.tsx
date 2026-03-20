@@ -439,6 +439,9 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
     return sections;
   }, [activeParentId, groupFilteredParentCategories, getChildCategories, filterType, searchQuery]);
 
+  const activeParentIdRef = useRef(activeParentId);
+  activeParentIdRef.current = activeParentId;
+
   // IntersectionObserver to track which parent header is visible and update parent tab
   useEffect(() => {
     if (activeParentId === null) return;
@@ -459,7 +462,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
         }
         if (topEntry) {
           const parentId = topEntry.target.getAttribute('data-parent-header');
-          if (parentId && parentId !== activeParentId) {
+          if (parentId && parentId !== activeParentIdRef.current) {
             setActiveParentId(parentId);
           }
         }
@@ -476,7 +479,7 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
     });
 
     return () => observer.disconnect();
-  }, [allSections, activeParentId]);
+  }, [allSections]);
 
   // Auto-scroll the parent tab bar to keep the active tab visible
   useEffect(() => {
