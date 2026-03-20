@@ -45,6 +45,7 @@ export interface ApiCategory {
   id: string;
   name: string;
   group?: string;
+  filterTag?: string | null;
   parentId?: string | null;
   parentName?: string | null;
   isParent?: boolean;

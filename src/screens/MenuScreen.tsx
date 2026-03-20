@@ -32,6 +32,9 @@ function getGroupType(group: string): 'food' | 'beverage' | 'tobacco' | 'other' 
 // ── Alcoholic detection helper ─────────────────────────────────────────────
 const ALCOHOLIC_KEYWORDS = ['alcohol', 'liquor', 'beer', 'wine', 'whiskey', 'vodka', 'rum', 'gin', 'cocktail', 'spirits', 'scotch', 'bourbon'];
 function isAlcoholicItem(_item: ApiMenuItem, category?: ApiCategory): boolean {
+  if (category?.filterTag === 'alcoholic') return true;
+  if (category?.filterTag === 'non-alcoholic') return false;
+  // Fallback: keyword matching for categories without filterTag set
   const catName = (category?.name || '').toLowerCase();
   return ALCOHOLIC_KEYWORDS.some(kw => catName.includes(kw));
 }
