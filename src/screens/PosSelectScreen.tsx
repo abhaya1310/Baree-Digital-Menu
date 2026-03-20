@@ -13,6 +13,18 @@ function getBrandSlug(): string | null {
   return null;
 }
 
+const GRADIENT = 'linear-gradient(180deg, #8B4513 0%, #A0522D 40%, #CD853F 100%)';
+
+function FullScreenGradient({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className="fixed inset-0 z-0" style={{ background: GRADIENT }}>
+      <div className={`relative z-10 min-h-screen flex items-center justify-center ${className}`}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export default function PosSelectScreen() {
   const { outletSlug } = useParams<{ outletSlug: string }>();
   const navigate = useNavigate();
@@ -70,25 +82,19 @@ export default function PosSelectScreen() {
   // Loading state
   if (loading) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ background: 'linear-gradient(180deg, #8B4513 0%, #A0522D 40%, #CD853F 100%)' }}
-      >
+      <FullScreenGradient>
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-3 border-white/30 border-t-white rounded-full animate-spin" />
           <p className="text-white/70 font-inter text-sm">Loading...</p>
         </div>
-      </div>
+      </FullScreenGradient>
     );
   }
 
   // Error state
   if (error || !data) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center px-6"
-        style={{ background: 'linear-gradient(180deg, #8B4513 0%, #A0522D 40%, #CD853F 100%)' }}
-      >
+      <FullScreenGradient className="px-6">
         <div className="text-center max-w-sm">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/10 flex items-center justify-center">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -105,17 +111,15 @@ export default function PosSelectScreen() {
             Try again
           </button>
         </div>
-      </div>
+      </FullScreenGradient>
     );
   }
 
   const { outlet, brand, accessPoints } = data;
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center px-6"
-      style={{ background: 'linear-gradient(180deg, #8B4513 0%, #A0522D 40%, #CD853F 100%)' }}
-    >
+    <div className="fixed inset-0 z-0" style={{ background: GRADIENT }}>
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6">
       {/* Brand logo or name */}
       {brand.logo ? (
         <img
@@ -157,6 +161,7 @@ export default function PosSelectScreen() {
             <span className="text-[#5C2D0E]/50 text-[18px]">›</span>
           </button>
         ))}
+      </div>
       </div>
     </div>
   );
