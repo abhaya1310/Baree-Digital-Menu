@@ -333,12 +333,17 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
 
   const hasRecommended = recommendedItems.length > 0 || hasOffers;
 
-  // Initialize activeParentId when parent categories load
+  // Initialize activeParentId when parent categories load (decided ONCE)
+  const hasInitializedParentTab = useRef(false);
   useEffect(() => {
-    if (groupFilteredParentCategories.length > 0 && activeParentId === null && !hasRecommended) {
-      setActiveParentId(groupFilteredParentCategories[0].id);
+    if (hasInitializedParentTab.current) return;
+    if (groupFilteredParentCategories.length > 0) {
+      hasInitializedParentTab.current = true;
+      if (!hasRecommended) {
+        setActiveParentId(groupFilteredParentCategories[0].id);
+      }
     }
-  }, [groupFilteredParentCategories, activeParentId, hasRecommended]);
+  }, [groupFilteredParentCategories, hasRecommended]);
 
   const handleParentTabChange = useCallback((parentId: string | null) => {
     isUserTabClick.current = true;
@@ -356,14 +361,17 @@ export default function MenuScreen({ onNavigateToSpecials, activeGroup, onGroupC
     setTimeout(() => { isUserTabClick.current = false; }, 800);
   }, []);
 
-  // Reset parent tab when group changes
+  // Reset parent tab when group changes (ref-guarded)
+  const prevActiveGroup = useRef(activeGroup);
   useEffect(() => {
+    if (prevActiveGroup.current === activeGroup) return;
+    prevActiveGroup.current = activeGroup;
     if (hasRecommended) {
       setActiveParentId(null);
     } else if (groupFilteredParentCategories.length > 0) {
-      setActiveParentId(groupFilteredParentCategories[0].id);
+      handleParentTabChange(groupFilteredParentCategories[0].id);
     }
-  }, [activeGroup]);
+  }, [activeGroup, hasRecommended, groupFilteredParentCategories, handleParentTabChange]);
 
   // Auto-switch filter based on search results
   useEffect(() => {

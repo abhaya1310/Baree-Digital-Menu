@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { MenuProvider, useMenu } from "./context/MenuContext";
 import MenuScreen from "./screens/MenuScreen";
 import SpecialsScreen from "./screens/SpecialsScreen";
@@ -69,11 +69,14 @@ function AppContent() {
   const [currentScreen, setCurrentScreen] = useState<"specials" | "menu">("menu");
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
 
+  // Start on specials if recommended items exist (decided ONCE)
+  const hasDecidedInitialScreen = useRef(false);
   useEffect(() => {
-    if (menu && !hasRecommended && currentScreen === 'specials') {
-      setCurrentScreen('menu');
+    if (menu && !hasDecidedInitialScreen.current) {
+      hasDecidedInitialScreen.current = true;
+      if (hasRecommended) setCurrentScreen('specials');
     }
-  }, [menu, hasRecommended, currentScreen]);
+  }, [menu, hasRecommended]);
 
   // Reset scroll position when screen changes
   useEffect(() => {
